@@ -4,5 +4,9 @@
   "description": "A parser for Solidity language",
   "main": "index.js",
   "author": "Kwang Yul Seo <kseo@kodebox.io>",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeChain-io/solidity-parser"
+  }
 }
