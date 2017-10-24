@@ -238,3 +238,11 @@ export function isTimeSubdenomination(op: TokenName): boolean {
 export function isReservedKeyword(op: TokenName): boolean {
     return (TokenName.Abstract <= op && op <= TokenName.TypeOf);
 }
+
+export class ElementTypeNameToken {
+    constructor(
+        public readonly token: TokenName,
+        public readonly firstNumber: number,
+        public readonly secondNumber: number) {
+    }
+}
