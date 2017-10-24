@@ -1,3 +1,36 @@
+/**
+ * Type of objects whose values are all of the same type.
+ * The `in` and `for-in` operators can *not* be safely used,
+ * since `Object.prototype` may be modified by outside code.
+ */
+export interface MapLike<T> {
+    [index: string]: T;
+}
+
+/** ES6 Map interface, only read methods included. */
+export interface ReadonlyMap<T> {
+    get(key: string): T | undefined;
+    has(key: string): boolean;
+    forEach(action: (value: T, key: string) => void): void;
+    readonly size: number;
+    keys(): Iterator<string>;
+    values(): Iterator<T>;
+    entries(): Iterator<[string, T]>;
+}
+
+/** ES6 Map interface. */
+export interface Map<T> extends ReadonlyMap<T> {
+    set(key: string, value: T): this;
+    delete(key: string): boolean;
+    clear(): void;
+}
+
+export const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+// The global Map object. This may not be available, so we must test for it.
+declare const Map: { new <T>(): Map<T> } | undefined;
+export const MapCtr = Map;
+
 export const enum TokenName {
     // End of source indicator.
     EOS,

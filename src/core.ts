@@ -1,3 +1,4 @@
+import { Map, MapCtr, MapLike, hasOwnProperty } from "./types";
 export const enum AssertionLevel {
     None = 0,
     Normal = 1,
@@ -73,4 +74,18 @@ export namespace Debug {
             return match ? match[1] : "";
         }
     }
+}
+
+export function createMapFromTemplate<T>(template?: MapLike<T>): Map<T> {
+    const map: Map<T> = new MapCtr<T>();
+
+    // Copies keys/values from template. Note that for..in will not throw if
+    // template is undefined, and instead will just exit the loop.
+    for (const key in template) {
+        if (hasOwnProperty.call(template, key)) {
+            map.set(key, template[key]);
+        }
+    }
+
+    return map;
 }
