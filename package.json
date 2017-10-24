@@ -1,0 +1,8 @@
+{
+  "name": "solidity-parser",
+  "version": "0.1.0",
+  "description": "A parser for Solidity language",
+  "main": "index.js",
+  "author": "Kwang Yul Seo <kseo@kodebox.io>",
+  "license": "Apache-2.0"
+}
