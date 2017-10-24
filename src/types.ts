@@ -165,3 +165,76 @@ export const enum TokenName {
     // Scanner-internal use only.
     Whitespace
 };
+
+export function isElementaryTypeName(tok: TokenName): boolean {
+    return TokenName.Int <= tok && tok < TokenName.TypesEnd;
+}
+
+export function isAssignmentOp(tok: TokenName): boolean {
+    return TokenName.Assign <= tok && tok <= TokenName.AssignMod;
+}
+
+export function isBinaryOp(op: TokenName): boolean {
+    return TokenName.Comma <= op && op <= TokenName.Exp;
+}
+
+export function isCommutativeOp(op: TokenName): boolean {
+    return op === TokenName.BitOr || op === TokenName.BitXor || op === TokenName.BitAnd ||
+        op === TokenName.Add || op === TokenName.Mul || op === TokenName.Equal || op === TokenName.NotEqual;
+}
+
+export function isArithmeticOp(op: TokenName): boolean {
+    return TokenName.Add <= op && op <= TokenName.Exp;
+}
+
+export function isCompareOp(op: TokenName): boolean {
+    return TokenName.Equal <= op && op <= TokenName.GreaterThanOrEqual;
+}
+
+export function isBitOp(op: TokenName): boolean {
+    return (TokenName.BitOr <= op && op <= TokenName.BitAnd) || op === TokenName.BitNot;
+}
+
+export function isBooleanOp(op: TokenName): boolean {
+    return (TokenName.Or <= op && op <= TokenName.And) || op === TokenName.Not;
+}
+
+export function isUnaryOp(op: TokenName): boolean {
+    return (TokenName.Not <= op && op <= TokenName.Delete) || op === TokenName.Add || op === TokenName.Sub;
+}
+
+export function isCountOp(op: TokenName): boolean {
+    return op === TokenName.Inc || op === TokenName.Dec;
+}
+
+export function isShiftOp(op: TokenName): boolean {
+    return (TokenName.SHL <= op) && (op <= TokenName.SHR);
+}
+
+export function isVisibilitySpecifier(op: TokenName): boolean {
+    return isVariableVisibilitySpecifier(op) || op === TokenName.External;
+}
+
+export function isVariableVisibilitySpecifier(op: TokenName): boolean {
+    return op === TokenName.Public || op === TokenName.Private || op === TokenName.Internal;
+}
+
+export function isLocationSpecifier(op: TokenName): boolean {
+    return op === TokenName.Memory || op === TokenName.Storage;
+}
+
+export function isStateMutabilitySpecifier(op: TokenName): boolean {
+    return op === TokenName.Pure || op === TokenName.Constant || op === TokenName.View || op === TokenName.Payable;
+}
+
+export function isEtherSubdenomination(op: TokenName): boolean {
+    return op === TokenName.SubWei || op === TokenName.SubSzabo || op === TokenName.SubFinney || op === TokenName.SubEther;
+}
+
+export function isTimeSubdenomination(op: TokenName): boolean {
+    return op === TokenName.SubSecond || op === TokenName.SubMinute || op === TokenName.SubHour || op === TokenName.SubDay || op === TokenName.SubWeek || op === TokenName.SubYear;
+}
+
+export function isReservedKeyword(op: TokenName): boolean {
+    return (TokenName.Abstract <= op && op <= TokenName.TypeOf);
+}
