@@ -416,3 +416,12 @@ export class ElementTypeNameToken {
         public readonly secondNumber: number) {
     }
 }
+
+export class SourceLocation {
+    constructor(
+        public start: number,
+        public end: number,
+        public readonly sourceName = ""
+    ) {
+    }
+}
