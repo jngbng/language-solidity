@@ -89,3 +89,44 @@ export function createMapFromTemplate<T>(template?: MapLike<T>): Map<T> {
 
     return map;
 }
+
+/**
+ * Iterates through `array` by index and performs the callback on each element of array until the callback
+ * returns a falsey value, then returns false.
+ * If no such value is found, the callback is applied to each element of array and `true` is returned.
+ */
+export function every<T>(array: ReadonlyArray<T>, callback: (element: T, index: number) => boolean, options: { from?: number, to?: number } = {}): boolean {
+    if (array) {
+        const { from = 0, to = array.length } = options;
+        for (let i = from; i < to; i++) {
+            if (!callback(array[i], i)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/** Works like Array.prototype.findIndex, returning `-1` if no element satisfying the predicate is found. */
+export function findIndex<T>(array: ReadonlyArray<T>, predicate: (element: T, index: number) => boolean, options: { from?: number, to?: number } = {}): number {
+    const { from = 0, to = array.length } = options;
+
+    for (let i = from; i < to; i++) {
+        if (predicate(array[i], i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+export function clone<T>(object: T): T {
+    const result: any = {};
+    for (const id in object) {
+        if (hasOwnProperty.call(object, id)) {
+            result[id] = (<any>object)[id];
+        }
+    }
+    return result;
+}
