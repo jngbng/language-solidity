@@ -1,5 +1,5 @@
 import { createMapFromTemplate } from "./core";
-import { Map, TokenName } from "./types";
+import { CharacterCodes, Map, TokenName } from "./types";
 
 const textToToken = createMapFromTemplate({
     "(": TokenName.LParen,
@@ -149,4 +149,40 @@ const tokenStrings = makeReverseMap(textToToken);
 
 export function tokenToString(t: TokenName): string | undefined {
     return tokenStrings[t];
+}
+
+function isDecimalDigit(c: number): boolean {
+    return CharacterCodes._0 <= c && c <= CharacterCodes._9;
+}
+
+function isHexDigit(c: number): boolean {
+    return isDecimalDigit(c)
+        || (CharacterCodes.a <= c && c <= CharacterCodes.f)
+        || (CharacterCodes.A <= c && c <= CharacterCodes.F);
+}
+
+function isLineTerminator(c: number): boolean {
+    return c === CharacterCodes.lineFeed;
+}
+
+function isWhiteSpace(c: number): boolean {
+    return c === CharacterCodes.space || c === CharacterCodes.lineFeed || c === CharacterCodes.tab || c === CharacterCodes.carriageReturn;
+}
+
+function isIdentifierStart(c: number): boolean {
+    return c === CharacterCodes._ || c === CharacterCodes.$ || (CharacterCodes.a <= c && c <= CharacterCodes.z) || (CharacterCodes.A <= c && c <= CharacterCodes.Z);
+}
+
+function isIdentifierPart(c: number): boolean {
+    return isIdentifierStart(c) || isDecimalDigit(c);
+}
+
+function hexValue(c: number): number {
+    if (c >= CharacterCodes._0 && c <= CharacterCodes._9)
+        return c - CharacterCodes._0;
+    else if (c >= CharacterCodes.a && c <= CharacterCodes.f)
+        return c - CharacterCodes.a + 10;
+    else if (c >= CharacterCodes.A && c <= CharacterCodes.F)
+        return c - CharacterCodes.A + 10;
+    else return -1;
 }
