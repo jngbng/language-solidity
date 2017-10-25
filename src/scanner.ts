@@ -1,5 +1,5 @@
 import { createMapFromTemplate } from "./core";
-import { TokenName } from "./types";
+import { Map, TokenName } from "./types";
 
 const textToToken = createMapFromTemplate({
     "(": TokenName.LParen,
@@ -135,4 +135,18 @@ const textToToken = createMapFromTemplate({
 /* @internal */
 export function stringToToken(s: string): TokenName {
     return textToToken.get(s);
+}
+
+function makeReverseMap(source: Map<number>): string[] {
+    const result: string[] = [];
+    source.forEach((value, name) => {
+        result[value] = name;
+    });
+    return result;
+}
+
+const tokenStrings = makeReverseMap(textToToken);
+
+export function tokenToString(t: TokenName): string | undefined {
+    return tokenStrings[t];
 }
