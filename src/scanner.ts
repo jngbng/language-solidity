@@ -1,4 +1,4 @@
-import { createMapFromTemplate } from "./core";
+import { Debug, createMapFromTemplate } from "./core";
 import { CharacterCodes, Map, TokenName } from "./types";
 
 const textToToken = createMapFromTemplate({
@@ -185,4 +185,42 @@ function hexValue(c: number): number {
     else if (c >= CharacterCodes.A && c <= CharacterCodes.F)
         return c - CharacterCodes.A + 10;
     else return -1;
+}
+
+class CharStream {
+    private _position = 0;
+
+    public get position(): number {
+        return this._position;
+    }
+
+    constructor(public readonly source: string) {
+    }
+
+    public get(charsForward = 0): number {
+        return this.source.charCodeAt(this.position + charsForward);
+    }
+
+    public advanceAndGet(chars = 1): number {
+        if (this.isPastEndOfInput())
+            return 0;
+        this._position += chars;
+        if (this.isPastEndOfInput())
+            return 0;
+        return this.source.charCodeAt(this._position);
+    }
+
+    public rollback(amount: number): number {
+        Debug.assert(this.position >= amount);
+        this._position -= amount;
+        return this.get();
+    }
+
+    public isPastEndOfInput(charsForward = 0): boolean {
+        return (this.position + charsForward) >= this.source.length;
+    }
+
+    public reset() {
+        this._position = 0;
+    }
 }
