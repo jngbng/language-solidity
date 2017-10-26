@@ -283,10 +283,14 @@ export class Scanner {
     /* internal */ nextToken = new TokenDesc(); // desc for next token (one token look-ahead)
 
     private source: CharStream;
-    private sourceName: string;
+    private _sourceName: string;
 
     /// one character look-ahead, equals 0 at end of input
     private char: number;
+
+    public get sourceName(): string {
+        return this._sourceName;
+    }
 
     constructor(source = new CharStream(), sourceName = "") {
         this.resetSource(source, sourceName);
@@ -295,7 +299,7 @@ export class Scanner {
     /// Resets the scanner as if newly constructed with source and sourceName as input.
     public resetSource(source: CharStream, sourceName: string) {
         this.source = source;
-        this.sourceName = sourceName;
+        this._sourceName = sourceName;
         this.reset();
     }
 
