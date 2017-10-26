@@ -337,6 +337,19 @@ export class Scanner {
         return this._currentToken.extendedTokenInfo;
     }
 
+    /// @returns the next token without advancing input.
+    public peekNextToken(): TokenName {
+        return this.nextToken.token;
+    }
+
+    public peekLocation(): SourceLocation {
+        return this.nextToken.location;
+    }
+
+    public peekLiteral(): string {
+        return String.fromCharCode(...this.nextToken.literal);
+    }
+
     /// Return the current source position.
     private get sourcePos(): number {
         return this.source.position;
