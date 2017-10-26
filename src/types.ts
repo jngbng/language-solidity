@@ -419,9 +419,26 @@ export class ElementTypeNameToken {
 
 export class SourceLocation {
     constructor(
-        public start: number,
-        public end: number,
+        public start = 0,
+        public end = 0,
         public readonly sourceName = ""
     ) {
+    }
+}
+
+export const enum DiagnosticCategory {
+    DeclarationError,
+    DocstringParsingError,
+    ParserError,
+    TypeError,
+    SyntaxError,
+    Warning
+};
+
+export class Diagnostic {
+    constructor(
+        public readonly type: DiagnosticCategory,
+        public readonly desription: string,
+        public readonly location = new SourceLocation()) {
     }
 }
