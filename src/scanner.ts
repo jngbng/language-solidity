@@ -275,6 +275,14 @@ class LiteralScope {
     }
 }
 
+export class ElementTypeNameToken {
+    constructor(
+        public readonly token: TokenName,
+        public readonly firstNumber: number,
+        public readonly secondNumber: number) {
+    }
+}
+
 export class Scanner {
     private skippedComment = new TokenDesc();               // desc for current skipped comment
     /* internal */ nextSkippedComment = new TokenDesc();    // desc for next skiped comment
@@ -323,6 +331,11 @@ export class Scanner {
 
     public get currentToken(): TokenName {
         return this._currentToken.token;
+    }
+
+    public get currentElementaryTypeNameToken(): ElementTypeNameToken {
+        const { m, n } = this._currentToken.extendedTokenInfo;
+        return new ElementTypeNameToken(this._currentToken.token, m, n);
     }
 
     public get currentLocation(): SourceLocation {
