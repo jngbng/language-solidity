@@ -194,7 +194,7 @@ class CharStream {
         return this._position;
     }
 
-    constructor(public readonly source: string) {
+    constructor(public readonly source = "") {
     }
 
     public get(charsForward = 0): number {
@@ -288,7 +288,7 @@ export class Scanner {
     /// one character look-ahead, equals 0 at end of input
     private char: number;
 
-    constructor(source: CharStream, sourceName = "") {
+    constructor(source = new CharStream(), sourceName = "") {
         this.resetSource(source, sourceName);
     }
 
