@@ -409,7 +409,7 @@ export function isReservedKeyword(op: TokenName): boolean {
     return (TokenName.Abstract <= op && op <= TokenName.TypeOf);
 }
 
-export class ElementTypeNameToken {
+export class ElementaryTypeNameToken {
     constructor(
         public readonly token: TokenName,
         public readonly firstNumber: number,

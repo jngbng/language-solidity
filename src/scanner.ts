@@ -1,5 +1,5 @@
 import { Debug, clone, createMapFromTemplate, every, findIndex } from "./core";
-import { CharacterCodes, Map, SourceLocation, TokenName } from "./types";
+import { CharacterCodes, ElementaryTypeNameToken, Map, SourceLocation, TokenName } from "./types";
 
 const textToToken = createMapFromTemplate({
     "(": TokenName.LParen,
@@ -275,14 +275,6 @@ class LiteralScope {
     }
 }
 
-export class ElementTypeNameToken {
-    constructor(
-        public readonly token: TokenName,
-        public readonly firstNumber: number,
-        public readonly secondNumber: number) {
-    }
-}
-
 export class Scanner {
     private skippedComment = new TokenDesc();               // desc for current skipped comment
     /* internal */ nextSkippedComment = new TokenDesc();    // desc for next skiped comment
@@ -333,9 +325,9 @@ export class Scanner {
         return this._currentToken.token;
     }
 
-    public get currentElementaryTypeNameToken(): ElementTypeNameToken {
+    public get currentElementaryTypeNameToken(): ElementaryTypeNameToken {
         const { m, n } = this._currentToken.extendedTokenInfo;
-        return new ElementTypeNameToken(this._currentToken.token, m, n);
+        return new ElementaryTypeNameToken(this._currentToken.token, m, n);
     }
 
     public get currentLocation(): SourceLocation {
