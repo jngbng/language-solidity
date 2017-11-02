@@ -138,3 +138,70 @@ export function applyMixins(derivedCtor: any, baseCtors: any[]) {
         });
     });
 }
+
+export interface MultiMap<T> extends Map<T[]> {
+    /**
+     * Adds the value to an array of values associated with the key, and returns the array.
+     * Creates the array if it does not already exist.
+     */
+    add(key: string, value: T): T[];
+    /**
+     * Removes a value from an array of values associated with the key.
+     * Does not preserve the order of those values.
+     * Does nothing if `key` is not in `map`, or `value` is not in `map[key]`.
+     */
+    remove(key: string, value: T): void;
+}
+
+/** Create a new map. If a template object is provided, the map will copy entries from it. */
+export function createMap<T>(): Map<T> {
+    return new MapCtr<T>();
+}
+
+export function createMultiMap<T>(): MultiMap<T> {
+    const map = createMap<T[]>() as MultiMap<T>;
+    map.add = multiMapAdd;
+    map.remove = multiMapRemove;
+    return map;
+}
+function multiMapAdd<T>(this: MultiMap<T>, key: string, value: T) {
+    let values = this.get(key);
+    if (values) {
+        values.push(value);
+    }
+    else {
+        this.set(key, values = [value]);
+    }
+    return values;
+
+}
+function multiMapRemove<T>(this: MultiMap<T>, key: string, value: T) {
+    const values = this.get(key);
+    if (values) {
+        unorderedRemoveItem(values, value);
+        if (!values.length) {
+            this.delete(key);
+        }
+    }
+}
+
+/** Remove the *first* occurrence of `item` from the array. */
+export function unorderedRemoveItem<T>(array: T[], item: T): void {
+    unorderedRemoveFirstItemWhere(array, element => element === item);
+}
+
+/** Remove the *first* element satisfying `predicate`. */
+function unorderedRemoveFirstItemWhere<T>(array: T[], predicate: (element: T) => boolean): void {
+    for (let i = 0; i < array.length; i++) {
+        if (predicate(array[i])) {
+            unorderedRemoveItemAt(array, i);
+            break;
+        }
+    }
+}
+
+export function unorderedRemoveItemAt<T>(array: T[], index: number): void {
+    // Fill in the "hole" left at `index`.
+    array[index] = array[array.length - 1];
+    array.pop();
+}
