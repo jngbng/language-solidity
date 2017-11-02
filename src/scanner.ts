@@ -342,6 +342,17 @@ export class Scanner {
         return this._currentToken.extendedTokenInfo;
     }
 
+    public get currentCommentLocation(): SourceLocation {
+        return this.skippedComment.location;
+    }
+    public get currentCommentLiteral(): string {
+        return String.fromCharCode(...this.skippedComment.literal);
+    }
+    /// Called by the parser during FunctionDefinition parsing to clear the current comment
+    public clearCurrentCommentLiteral() {
+        this.skippedComment.literal = [];
+    }
+
     /// @returns the next token without advancing input.
     public peekNextToken(): TokenName {
         return this.nextToken.token;
@@ -350,7 +361,6 @@ export class Scanner {
     public peekLocation(): SourceLocation {
         return this.nextToken.location;
     }
-
     public peekLiteral(): string {
         return String.fromCharCode(...this.nextToken.literal);
     }
