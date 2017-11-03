@@ -205,3 +205,50 @@ export function unorderedRemoveItemAt<T>(array: T[], index: number): void {
     array[index] = array[array.length - 1];
     array.pop();
 }
+
+/**
+ * Returns the first element of an array if non-empty, `undefined` otherwise.
+ */
+export function firstOrUndefined<T>(array: ReadonlyArray<T>): T | undefined {
+    return elementAt(array, 0);
+}
+
+export function first<T>(array: ReadonlyArray<T>): T {
+    Debug.assert(array.length !== 0);
+    return array[0];
+}
+
+/**
+ * Returns the last element of an array if non-empty, `undefined` otherwise.
+ */
+export function lastOrUndefined<T>(array: ReadonlyArray<T>): T | undefined {
+    return elementAt(array, -1);
+}
+
+export function last<T>(array: ReadonlyArray<T>): T {
+    Debug.assert(array.length !== 0);
+    return array[array.length - 1];
+}
+
+
+/**
+ * Returns the element at a specific offset in an array if non-empty, `undefined` otherwise.
+ * A negative offset indicates the element should be retrieved from the end of the array.
+ */
+export function elementAt<T>(array: ReadonlyArray<T> | undefined, offset: number): T | undefined {
+    if (array) {
+        offset = toOffset(array, offset);
+        if (offset < array.length) {
+            return array[offset];
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Gets the actual offset into an array for a relative offset. Negative offsets indicate a
+ * position offset from the end of the array.
+ */
+function toOffset(array: ReadonlyArray<any>, offset: number) {
+    return offset < 0 ? array.length + offset : offset;
+}
