@@ -132,6 +132,61 @@ const textToToken = createMapFromTemplate({
     "typeof": TokenName.TypeOf
 });
 
+export function precedence(t: TokenName): number {
+    switch (t) {
+        case TokenName.Exp:
+            return 14;
+        case TokenName.Mul:
+        case TokenName.Div:
+        case TokenName.Mod:
+            return 13;
+        case TokenName.Add:
+        case TokenName.Sub:
+            return 12;
+        case TokenName.SHL:
+        case TokenName.SAR:
+        case TokenName.SHR:
+            return 11;
+        case TokenName.BitAnd:
+            return 10;
+        case TokenName.BitXor:
+            return 9;
+        case TokenName.BitOr:
+            return 8;
+        case TokenName.LessThan:
+        case TokenName.GreaterThan:
+        case TokenName.LessThanOrEqual:
+        case TokenName.GreaterThanOrEqual:
+            return 7;
+        case TokenName.Equal:
+        case TokenName.NotEqual:
+            return 6;
+        case TokenName.And:
+            return 5;
+        case TokenName.Or:
+            return 4;
+        case TokenName.Conditional:
+            return 3;
+        case TokenName.Assign:
+        case TokenName.AssignBitOr:
+        case TokenName.AssignBitXor:
+        case TokenName.AssignBitAnd:
+        case TokenName.AssignShl:
+        case TokenName.AssignSar:
+        case TokenName.AssignShr:
+        case TokenName.AssignAdd:
+        case TokenName.AssignSub:
+        case TokenName.AssignMul:
+        case TokenName.AssignDiv:
+        case TokenName.AssignMod:
+            return 2;
+        case TokenName.Comma:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 /* @internal */
 export function stringToToken(s: string): TokenName {
     return textToToken.get(s);
