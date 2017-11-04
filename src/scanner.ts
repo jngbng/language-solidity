@@ -242,7 +242,7 @@ function hexValue(c: number): number {
     else return -1;
 }
 
-class CharStream {
+export class CharStream {
     private _position = 0;
 
     public get position(): number {
