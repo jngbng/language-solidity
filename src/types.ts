@@ -188,8 +188,23 @@ export const enum DiagnosticCategory {
 
 export class Diagnostic {
     constructor(
-        public readonly type: DiagnosticCategory,
+        public readonly category: DiagnosticCategory,
         public readonly desription: string,
         public readonly location = new SourceLocation()) {
     }
+}
+
+/// helper functions
+export function containsDiagnosticOfCategory(list: Diagnostic[], category: DiagnosticCategory): Diagnostic | undefined {
+    for (const diagnostic of list) {
+        if (diagnostic.category === category)
+            return diagnostic;
+    }
+}
+export function containsOnlyWarnings(list: Diagnostic[]): boolean {
+    for (const diagnostic of list) {
+        if (diagnostic.category !== DiagnosticCategory.Warning)
+            return false;
+    }
+    return true;
 }
