@@ -88,6 +88,15 @@ class TokenDesc {
         this.literal = [];
         this.extendedTokenInfo = { m: 0, n: 0 };
     }
+
+    public clone(): TokenDesc {
+        const instance = new TokenDesc();
+        instance.token = this.token;
+        instance.location = clone(this.location);
+        instance.literal = this.literal.slice();
+        instance.extendedTokenInfo = clone(this.extendedTokenInfo);
+        return instance;
+    }
 }
 
 enum LiteralType {
@@ -165,8 +174,8 @@ export class Scanner {
 
     /// Returns the next token and advances input.
     public next(): TokenName {
-        this._currentToken = clone(this.nextToken);
-        this.skippedComment = clone(this.nextSkippedComment);
+        this._currentToken = this.nextToken.clone();
+        this.skippedComment = this.nextSkippedComment.clone();
         this.scanToken();
 
         return this._currentToken.token;
