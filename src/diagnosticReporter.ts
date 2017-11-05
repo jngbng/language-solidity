@@ -1,14 +1,14 @@
 import { Diagnostic, DiagnosticCategory, SourceLocation } from "./types";
 
-export class ErrorReporter {
-    private _errors: Diagnostic[] = [];
+export class DiagnosticReporter {
+    private _diagnostics: Diagnostic[] = [];
 
-    public get errors(): Diagnostic[] {
-        return this._errors;
+    public get diagnostics(): Diagnostic[] {
+        return this._diagnostics;
     }
 
     public error(type: DiagnosticCategory, description: string, location: SourceLocation) {
-        this._errors.push(new Diagnostic(type, description, location));
+        this._diagnostics.push(new Diagnostic(type, description, location));
     }
 
     public warning(description: string, location?: SourceLocation) {
@@ -45,6 +45,6 @@ export class ErrorReporter {
     }
 
     public clear() {
-        this._errors = [];
+        this._diagnostics = [];
     }
 }
