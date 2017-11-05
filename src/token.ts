@@ -1,7 +1,7 @@
 import { Debug, createMapFromTemplate } from "./core";
 import { Map } from "./types";
 
-export const enum TokenName {
+export enum TokenName {
     // End of source indicator.
     EOS,
 
@@ -470,4 +470,8 @@ const tokenStrings = makeReverseMap(textToToken);
 
 export function tokenToString(t: TokenName): string | undefined {
     return tokenStrings[t];
+}
+
+export function tokenToName(t: TokenName): string {
+    return TokenName[t];
 }
