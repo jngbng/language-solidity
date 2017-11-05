@@ -42,7 +42,7 @@ export function stateMutabilityToString(stateMutability: StateMutability) {
 /**
  * Abstract class that is added to each AST node that can receive documentation.
  */
-class Documented {
+export class Documented {
     /// @return A shared pointer of an ASTString.
     /// Can contain an undefined in which case indicates absence of documentation
     public documentation(): string | undefined {
@@ -52,7 +52,7 @@ class Documented {
     _documentation?: string;
 }
 
-class ImplementationOptional {
+export class ImplementationOptional {
     /// @return whether this node is fully implemented or not
     public isImplemented(): boolean { return this._implemented; }
 

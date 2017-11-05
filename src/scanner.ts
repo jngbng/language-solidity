@@ -76,7 +76,7 @@ export class CharStream {
     }
 }
 
-class TokenDesc {
+export class TokenDesc {
     token: TokenName;
     location: SourceLocation;
     literal: number[];

@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "declaration": true,
         "target": "es6",
         "outDir": "./out",
         "lib": [
@@ -11,7 +12,6 @@
         "rootDir": ".",
         "noImplicitAny": true,
         "newLine": "LF",
-        "allowJs": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
