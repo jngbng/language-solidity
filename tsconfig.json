@@ -3,7 +3,7 @@
         "module": "commonjs",
         "declaration": true,
         "target": "es6",
-        "outDir": "./out",
+        "outDir": "./lib",
         "lib": [
             "es6",
             "dom"

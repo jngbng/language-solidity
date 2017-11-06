@@ -2,8 +2,8 @@
   "name": "language-solidity",
   "version": "0.1.0",
   "description": "A parser for Solidity language",
-  "main": "./out/index.js",
-  "typings": "./out/index.d.ts",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "author": "Kwang Yul Seo <kseo@kodebox.io>",
   "license": "Apache-2.0",
   "repository": {
@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "files": [
-    "out/"
+    "lib/"
   ],
   "jest": {
     "transform": {
