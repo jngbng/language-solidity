@@ -1,5 +1,5 @@
 {
-  "name": "solidity-parser",
+  "name": "language-solidity",
   "version": "0.1.0",
   "description": "A parser for Solidity language",
   "main": "./out/index.js",
@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CodeChain-io/solidity-parser"
+    "url": "https://github.com/CodeChain-io/language-solidity"
   },
   "scripts": {
     "test": "jest"
