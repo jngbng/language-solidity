@@ -11,6 +11,7 @@
     "url": "https://github.com/CodeChain-io/language-solidity"
   },
   "scripts": {
+    "prepublish": "tsc -p ./ --outDir lib/",
     "test": "jest"
   },
   "files": [
