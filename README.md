@@ -1,6 +1,6 @@
-Solidity Parser
-===============
-[![Build Status](https://travis-ci.org/CodeChain-io/solidity-parser.svg?branch=master)](https://travis-ci.org/CodeChain-io/solidity-parser)
+Language Solidity
+=================
+[![Build Status](https://travis-ci.org/CodeChain-io/language-solidity.svg?branch=master)](https://travis-ci.org/CodeChain-io/language-solidity)
 
 A Solidity parser written in TypeScript.
 
