@@ -8,7 +8,7 @@ import {
     isCompareOp,
     isUnaryOp
 } from "./token";
-import { SourceLocation } from "./types";
+import { CancellationToken, CompilerOptions, Diagnostic, Path, SourceLocation } from "./types";
 
 class IDDispenser {
     private id = 0;
@@ -1356,4 +1356,32 @@ export class UserDefinedTypeName extends TypeName {
         visitor.visitUserDefinedTypeName(this);
         visitor.endVisitUserDefinedTypeName(this);
     }
+}
+
+export interface ScriptReferenceHost {
+    getCompilerOptions(): CompilerOptions;
+    getSourceFile(fileName: string): SourceUnit;
+    getSourceFileByPath(path: Path): SourceUnit;
+    getCurrentDirectory(): string;
+}
+
+export interface Program extends ScriptReferenceHost {
+    /**
+     * Get a list of root file names that were passed to a 'createProgram'
+     */
+    getRootFileNames(): ReadonlyArray<string>;
+
+    /**
+     * Get a list of files in the program
+     */
+    getSourceFiles(): ReadonlyArray<SourceUnit>;
+
+    /**
+     * Get a list of file names that were passed to 'createProgram' or referenced in a
+     * program source file but could not be located.
+     */
+    /* @internal */
+    getMissingFilePaths(): ReadonlyArray<Path>;
+
+    getSyntacticDiagnostics(sourceFile?: SourceUnit, cancellationToken?: CancellationToken): ReadonlyArray<Diagnostic>;
 }
