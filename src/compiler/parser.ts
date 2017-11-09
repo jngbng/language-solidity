@@ -56,7 +56,7 @@ import {
 } from "./ast";
 import { Debug, clone, first, last } from "./core";
 import { DiagnosticReporter } from "./diagnosticReporter";
-import { Scanner } from "./scanner";
+import { CharStream, Scanner } from "./scanner";
 import {
     ElementaryTypeNameToken,
     TokenName,
@@ -290,7 +290,9 @@ export class Parser extends ParserBase {
         return LookAheadInfo.ExpressionStatement;
     }
 
-    public parse(scanner: Scanner): SourceUnit {
+    public parseSourceFile(fileName: string, sourceText: string): SourceUnit {
+        const scanner = new Scanner(new CharStream(sourceText), fileName);
+
         const withRecursionGuard = <T>(f: () => T): T => {
             try {
                 return f();
@@ -325,7 +327,7 @@ export class Parser extends ParserBase {
                             this.fatalParserError("Expected pragma, import directive or contract/interface/library definition.");
                     }
                 }
-                return nodeFactory.createNode(SourceUnit, nodes);
+                return nodeFactory.createNode(SourceUnit, sourceText, nodes);
             });
         } catch (err) {
             if (this.diagnosticReporter.diagnostics.length === 0)

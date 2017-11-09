@@ -36,11 +36,10 @@ class ContractNameCollector extends ASTVisitor {
 }
 
 function main() {
-    const source = fs.readFileSync("MetaCoin.sol").toString();
-    const scanner = new Scanner(new CharStream(source));
+    const sourceText = fs.readFileSync("MetaCoin.sol").toString();
     const reporter = new DiagnosticReporter();
     const parser = new Parser(reporter);
-    const node = parser.parse(scanner);
+    const node = parser.parseSourceFile("MetaCoin.sol", sourceText);
     const collector = new ContractNameCollector(node);
     console.log(collector.contractNames);
 }

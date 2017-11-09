@@ -11,7 +11,7 @@ import {
 
 function parseText(source: string): { node?: ContractDefinition, diagnostics: Diagnostic[] } {
     const diagnosticReporter = new DiagnosticReporter();
-    const sourceUnit = new Parser(diagnosticReporter).parse(new Scanner(new CharStream(source)));
+    const sourceUnit = new Parser(diagnosticReporter).parseSourceFile("", source);
     if (!sourceUnit)
         return { diagnostics: diagnosticReporter.diagnostics };
 

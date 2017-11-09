@@ -87,6 +87,7 @@ function listAccept<T extends ASTNode>(list: ReadonlyArray<T>, visitor: ASTVisit
 export class SourceUnit extends ASTNode {
     constructor(
         location: SourceLocation,
+        public readonly text: string,
         public readonly nodes: ReadonlyArray<ASTNode>
     ) {
         super(location);
