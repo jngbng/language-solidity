@@ -1,5 +1,5 @@
-import { CharStream, Scanner } from "../src/scanner";
-import { TokenName } from "../src/token";
+import { CharStream, Scanner } from "../../src/compiler/scanner";
+import { TokenName } from "../../src/compiler/token";
 
 test("test_empty", () => {
     const scanner = new Scanner(new CharStream(""));

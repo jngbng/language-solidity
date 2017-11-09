@@ -1,13 +1,13 @@
-import { ContractDefinition, FunctionDefinition } from "../src/ast";
-import { DiagnosticReporter } from "../src/diagnosticReporter";
-import { Parser } from "../src/parser";
-import { CharStream, Scanner } from "../src/scanner";
+import { ContractDefinition, FunctionDefinition } from "../../src/compiler/ast";
+import { DiagnosticReporter } from "../../src/compiler/diagnosticReporter";
+import { Parser } from "../../src/compiler/parser";
+import { CharStream, Scanner } from "../../src/compiler/scanner";
 import {
     Diagnostic,
     DiagnosticCategory,
     containsDiagnosticOfCategory,
     containsOnlyWarnings
-} from "../src/types";
+} from "../../src/compiler/types";
 
 function parseText(source: string): { node?: ContractDefinition, diagnostics: Diagnostic[] } {
     const diagnosticReporter = new DiagnosticReporter();
