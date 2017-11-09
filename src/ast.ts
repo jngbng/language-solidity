@@ -64,7 +64,7 @@ export class ImplementationOptional {
  */
 export class VariableScope {
     public addLocalVariable(localVariable: VariableDeclaration) { this._localVariables.push(localVariable); }
-    public localVariables(): VariableDeclaration[] { return this._localVariables; }
+    public localVariables(): ReadonlyArray<VariableDeclaration> { return this._localVariables; }
 
     _localVariables: VariableDeclaration[];
 }
@@ -90,7 +90,7 @@ export abstract class ASTNode {
     public abstract accept(visitor: ASTVisitor): void;
 }
 
-function listAccept<T extends ASTNode>(list: T[], visitor: ASTVisitor) {
+function listAccept<T extends ASTNode>(list: ReadonlyArray<T>, visitor: ASTVisitor) {
     for (const element of list)
         element.accept(visitor);
 }
@@ -98,7 +98,7 @@ function listAccept<T extends ASTNode>(list: T[], visitor: ASTVisitor) {
 export class SourceUnit extends ASTNode {
     constructor(
         location: SourceLocation,
-        public readonly nodes: ASTNode[]
+        public readonly nodes: ReadonlyArray<ASTNode>
     ) {
         super(location);
     }
@@ -113,8 +113,8 @@ export class SourceUnit extends ASTNode {
 export class PragmaDirective extends ASTNode {
     constructor(
         location: SourceLocation,
-        public readonly tokens: TokenName[],
-        public readonly literals: string[]
+        public readonly tokens: ReadonlyArray<TokenName>,
+        public readonly literals: ReadonlyArray<string>
     ) {
         super(location);
     }
@@ -252,8 +252,8 @@ export class FunctionCall extends Expression {
     constructor(
         location: SourceLocation,
         public readonly expression: Expression,
-        public readonly args: Expression[],
-        public readonly names: string[]
+        public readonly args: ReadonlyArray<Expression>,
+        public readonly names: ReadonlyArray<string>
     ) {
         super(location);
     }
@@ -325,7 +325,7 @@ export class BinaryOperation extends Expression {
 export class TupleExpression extends Expression {
     constructor(
         location: SourceLocation,
-        public readonly components: (Expression | undefined)[],
+        public readonly components: ReadonlyArray<Expression | undefined>,
         private _isArray: boolean
     ) {
         super(location);
@@ -522,12 +522,12 @@ export abstract class CallableDeclaration extends Declaration implements Variabl
         super(location, name, visibility);
     }
 
-    public get parameters(): VariableDeclaration[] {
+    public get parameters(): ReadonlyArray<VariableDeclaration> {
         return this.parameterList.parameters;
     }
 
     public addLocalVariable: (localVariable: VariableDeclaration) => void;
-    public localVariables: () => VariableDeclaration[];
+    public localVariables: () => ReadonlyArray<VariableDeclaration>;
 
     _localVariables: VariableDeclaration[] = [];
 }
@@ -543,7 +543,7 @@ export class FunctionDefinition extends CallableDeclaration implements Documente
         private _isConstructor: boolean,
         documentation: string,
         parameters: ParameterList,
-        public readonly modifiers: ModifierInvocation[],
+        public readonly modifiers: ReadonlyArray<ModifierInvocation>,
         returnParameters: ParameterList | undefined,
         public readonly body: Block | undefined) {
         super(location, name, visibility, parameters, returnParameters);
@@ -707,7 +707,7 @@ export class ModifierInvocation extends ASTNode {
     constructor(
         location: SourceLocation,
         public readonly name: Identifier,
-        public readonly args: Expression[]) {
+        public readonly args: ReadonlyArray<Expression>) {
         super(location);
     }
 
@@ -728,7 +728,7 @@ export class ModifierInvocation extends ASTNode {
 export class ParameterList extends ASTNode {
     constructor(
         location: SourceLocation,
-        public readonly parameters: VariableDeclaration[]
+        public readonly parameters: ReadonlyArray<VariableDeclaration>
     ) {
         super(location);
     }
@@ -744,7 +744,7 @@ export class InheritanceSpecifier extends ASTNode {
     constructor(
         location: SourceLocation,
         public readonly name: UserDefinedTypeName,
-        public readonly args: Expression[]) {
+        public readonly args: ReadonlyArray<Expression>) {
         super(location);
     }
 
@@ -780,7 +780,7 @@ export class Block extends Statement {
     constructor(
         location: SourceLocation,
         docString: string,
-        public readonly statements: Statement[]) {
+        public readonly statements: ReadonlyArray<Statement>) {
         super(location, docString);
     }
 
@@ -962,7 +962,7 @@ export class VariableDeclarationStatement extends Statement {
     constructor(
         location: SourceLocation,
         docString: string,
-        public readonly declarations: (VariableDeclaration | undefined)[],
+        public readonly declarations: ReadonlyArray<VariableDeclaration | undefined>,
         public readonly initialValue: Expression | undefined) {
         super(location, docString);
     }
@@ -1002,7 +1002,7 @@ export class ExpressionStatement extends Statement {
 
 export const enum ContractKind { Interface, Contract, Library }
 
-function filteredNodes<T extends ASTNode>(cons: Function, nodes: ASTNode[]): T[] {
+function filteredNodes<T extends ASTNode>(cons: Function, nodes: ReadonlyArray<ASTNode>): ReadonlyArray<T> {
     const ret: T[] = [];
     for (const node of nodes) {
         if (node instanceof cons) {
@@ -1024,8 +1024,8 @@ export class ContractDefinition extends Declaration implements Documented {
         location: SourceLocation,
         name: string,
         documentation: string,
-        public readonly baseContracts: InheritanceSpecifier[],
-        public readonly subNodes: ASTNode[],
+        public readonly baseContracts: ReadonlyArray<InheritanceSpecifier>,
+        public readonly subNodes: ReadonlyArray<ASTNode>,
         public readonly contractKind = ContractKind.Contract
     ) {
         super(location, name);
@@ -1043,25 +1043,25 @@ export class ContractDefinition extends Declaration implements Documented {
         visitor.endVisitContractDefinition(this);
     }
 
-    public usingForDirectives(): UsingForDirective[] {
+    public usingForDirectives(): ReadonlyArray<UsingForDirective> {
         return filteredNodes(UsingForDirective, this.subNodes);
     }
-    public definedStructs(): StructDefinition[] {
+    public definedStructs(): ReadonlyArray<StructDefinition> {
         return filteredNodes(StructDefinition, this.subNodes);
     }
-    public definedEnums(): EnumDefinition[] {
+    public definedEnums(): ReadonlyArray<EnumDefinition> {
         return filteredNodes(EnumDefinition, this.subNodes);
     }
-    public stateVariables(): VariableDeclaration[] {
+    public stateVariables(): ReadonlyArray<VariableDeclaration> {
         return filteredNodes(VariableDeclaration, this.subNodes);
     }
-    public functionModifiers(): ModifierDefinition[] {
+    public functionModifiers(): ReadonlyArray<ModifierDefinition> {
         return filteredNodes(ModifierDefinition, this.subNodes);
     }
-    public definedFunctions(): FunctionDefinition[] {
+    public definedFunctions(): ReadonlyArray<FunctionDefinition> {
         return filteredNodes(FunctionDefinition, this.subNodes);
     }
-    public events(): EventDefinition[] {
+    public events(): ReadonlyArray<EventDefinition> {
         return filteredNodes(EventDefinition, this.subNodes);
     }
 
@@ -1070,7 +1070,7 @@ export class ContractDefinition extends Declaration implements Documented {
     }
 
     /// @returns a list of the inheritable members of this contract
-    public inheritableMembers(): Declaration[] {
+    public inheritableMembers(): ReadonlyArray<Declaration> {
         if (!this._inheritableMembers) {
             const memberSeen = new Set<string>();
             this._inheritableMembers = [];
@@ -1133,7 +1133,7 @@ export class ImportDirective extends Declaration {
         /// The aliases for the specific symbols to import. If non-empty import the specific symbols.
         /// If the second component is empty, import the identifier unchanged.
         /// If both _unitAlias and _symbolAlias are empty, import all symbols into the current scope.
-        public readonly symbolAliases: [Identifier, string][]
+        public readonly symbolAliases: ReadonlyArray<[Identifier, string]>
     ) {
         super(location, unitAlias);
     }
@@ -1225,7 +1225,7 @@ export class StructDefinition extends Declaration {
     constructor(
         location: SourceLocation,
         name: string,
-        public readonly members: VariableDeclaration[]) {
+        public readonly members: ReadonlyArray<VariableDeclaration>) {
         super(location, name);
     }
 
@@ -1241,7 +1241,7 @@ export class EnumDefinition extends Declaration {
     constructor(
         location: SourceLocation,
         name: string,
-        public readonly members: EnumValue[]
+        public readonly members: ReadonlyArray<EnumValue>
     ) {
         super(location, name);
     }
@@ -1369,7 +1369,7 @@ export class FunctionTypeName extends TypeName {
 export class UserDefinedTypeName extends TypeName {
     constructor(
         location: SourceLocation,
-        public readonly namePath: string[]
+        public readonly namePath: ReadonlyArray<string>
     ) {
         super(location);
     }
