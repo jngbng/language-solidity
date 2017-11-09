@@ -22,21 +22,10 @@ class IDDispenser {
 const idDispenser = new IDDispenser();
 
 // How a function can mutate the EVM state.
-export const enum StateMutability { Pure, View, NonPayable, Payable }
+export enum StateMutability { Pure, View, NonPayable, Payable }
 
 export function stateMutabilityToString(stateMutability: StateMutability) {
-    switch (stateMutability) {
-        case StateMutability.Pure:
-            return "pure";
-        case StateMutability.View:
-            return "view";
-        case StateMutability.NonPayable:
-            return "nonpayable";
-        case StateMutability.Payable:
-            return "payable";
-        default:
-            Debug.assert(false, "Unknown state mutability.");
-    }
+    return StateMutability[stateMutability].toLowerCase();
 }
 
 /**
@@ -432,22 +421,10 @@ export class ElementaryTypeNameExpression extends PrimaryExpression {
 }
 
 /// Visibility ordered from restricted to unrestricted.
-export const enum Visibility { Default, Private, Internal, Public, External };
+export enum Visibility { Default, Private, Internal, Public, External };
 
 export function visibilityToString(visibility: Visibility): string {
-    switch (visibility) {
-        case Visibility.Public:
-            return "public";
-        case Visibility.Internal:
-            return "internal";
-        case Visibility.Private:
-            return "private";
-        case Visibility.External:
-            return "external";
-        default:
-            Debug.assert(false, "Invalid visibility specifier.");
-    }
-    return "";
+    return Visibility[visibility].toLowerCase();
 }
 
 /**
