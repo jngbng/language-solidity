@@ -228,3 +228,5 @@ export interface CancellationToken {
 }
 
 export type bigint = BigNumber;
+export type rational = BigNumber;
+export type u256 = BigNumber; // FIXME: Use 256 bit number

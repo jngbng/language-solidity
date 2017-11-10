@@ -120,6 +120,17 @@ export function findIndex<T>(array: ReadonlyArray<T>, predicate: (element: T, in
     return -1;
 }
 
+export function contains<T>(array: ReadonlyArray<T>, value: T): boolean {
+    if (array) {
+        for (const v of array) {
+            if (v === value) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 export function arrayIsEqualTo<T>(array1: ReadonlyArray<T>, array2: ReadonlyArray<T>, equaler?: (a: T, b: T) => boolean): boolean {
     if (!array1 || !array2) {
         return array1 === array2;

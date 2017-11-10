@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@types/bignumber.js": "^4.0.3",
-    "bignumber.js": "^4.1.0"
+    "bignumber.js": "^4.1.0",
+    "ethereumjs-util": "^5.1.2"
   }
 }
