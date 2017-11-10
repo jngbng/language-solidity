@@ -1,3 +1,5 @@
+import { BigNumber } from "bignumber.js";
+
 /**
  * Type of objects whose values are all of the same type.
  * The `in` and `for-in` operators can *not* be safely used,
@@ -224,3 +226,5 @@ export interface CancellationToken {
     /** @throws OperationCanceledException if isCancellationRequested is true */
     throwIfCancellationRequested(): void;
 }
+
+export type bigint = BigNumber;
