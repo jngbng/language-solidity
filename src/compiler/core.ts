@@ -252,3 +252,23 @@ export function elementAt<T>(array: ReadonlyArray<T> | undefined, offset: number
 function toOffset(array: ReadonlyArray<any>, offset: number) {
     return offset < 0 ? array.length + offset : offset;
 }
+
+/**
+ * Tests whether a value is an array.
+ */
+export function isArray(value: any): value is ReadonlyArray<any> {
+    return Array.isArray ? Array.isArray(value) : value instanceof Array;
+}
+
+/**
+ * Tests whether a value is string
+ */
+export function isString(text: any): text is string {
+    return typeof text === "string";
+}
+
+/** Do nothing and return false */
+export function returnFalse(): false { return false; }
+
+/** Do nothing and return true */
+export function returnTrue(): true { return true; }
