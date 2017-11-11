@@ -120,6 +120,24 @@ export function findIndex<T>(array: ReadonlyArray<T>, predicate: (element: T, in
     return -1;
 }
 
+export function arrayIsEqualTo<T>(array1: ReadonlyArray<T>, array2: ReadonlyArray<T>, equaler?: (a: T, b: T) => boolean): boolean {
+    if (!array1 || !array2) {
+        return array1 === array2;
+    }
+
+    if (array1.length !== array2.length) {
+        return false;
+    }
+
+    for (let i = 0; i < array1.length; i++) {
+        const equals = equaler ? equaler(array1[i], array2[i]) : array1[i] === array2[i];
+        if (!equals) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 export function clone<T>(object: T): T {
     const result: any = {};
