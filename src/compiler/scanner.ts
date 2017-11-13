@@ -1,5 +1,5 @@
-import { Debug, clone, every, findIndex } from "./core";
-import { ElementaryTypeNameToken, TokenName, stringToToken } from "./token";
+import { Debug, clone, } from "./core";
+import { ElementaryTypeNameToken, TokenName, fromIdentifierOrKeyword } from "./token";
 import { CharacterCodes, SourceLocation } from "./types";
 
 function isDecimalDigit(c: number): boolean {
@@ -859,54 +859,4 @@ export class Scanner {
         // Unterminated multi-line comment.
         return TokenName.Illegal;
     }
-}
-
-function fromIdentifierOrKeyword(literal: number[]): { token: TokenName, m: number, n: number } {
-    const literalString = String.fromCharCode(...literal);
-
-    const positionM = findIndex(literal, isDecimalDigit);
-    if (positionM !== -1) {
-        const baseType = literalString.substring(0, positionM);
-        const positionX = findIndex(literal, c => !isDecimalDigit(c), { from: positionM });
-        const m = parseInt(literalString.substring(positionM, positionX === -1 ? undefined : positionX));
-        const keyword = keywordByName(baseType);
-        if (keyword === TokenName.Bytes) {
-            if (0 < m && m <= 32 && positionX === -1)
-                return { token: TokenName.BytesM, m, n: 0 };
-        } else if (keyword === TokenName.UInt || keyword === TokenName.Int) {
-            if (0 < m && m <= 256 && m % 8 === 0 && positionX === -1) {
-                if (keyword === TokenName.UInt)
-                    return { token: TokenName.UIntM, m, n: 0 };
-                else
-                    return { token: TokenName.IntM, m, n: 0 };
-            }
-        } else if (keyword === TokenName.UFixed || keyword === TokenName.Fixed) {
-            if (
-                positionM < positionX &&
-                positionX !== -1 &&
-                literal[positionX] === CharacterCodes.x &&
-                every(literal, isDecimalDigit, { from: positionX + 1 })
-            ) {
-                const n = parseInt(literalString.substring(positionX + 1));
-                if (8 <= m && m <= 256 && m % 8 === 0 && 0 <= n && n <= 80) {
-                    if (keyword === TokenName.UFixed)
-                        return { token: TokenName.UFixedMxN, m, n };
-                    else
-                        return { token: TokenName.FixedMxN, m, n };
-                }
-            }
-        }
-        return { token: TokenName.Identifier, m: 0, n: 0 };
-    }
-
-    return {
-        token: keywordByName(literalString),
-        m: 0,
-        n: 0
-    };
-}
-
-function keywordByName(name: string): TokenName {
-    const token = stringToToken(name);
-    return token ? token : TokenName.Identifier;
 }
