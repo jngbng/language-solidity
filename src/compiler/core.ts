@@ -131,6 +131,21 @@ export function contains<T>(array: ReadonlyArray<T>, value: T): boolean {
     return false;
 }
 
+export function removeWhere<T>(array: T[], f: (x: T) => boolean): boolean {
+    let outIndex = 0;
+    for (const item of array) {
+        if (!f(item)) {
+            array[outIndex] = item;
+            outIndex++;
+        }
+    }
+    if (outIndex !== array.length) {
+        array.length = outIndex;
+        return true;
+    }
+    return false;
+}
+
 export function arrayIsEqualTo<T>(array1: ReadonlyArray<T>, array2: ReadonlyArray<T>, equaler?: (a: T, b: T) => boolean): boolean {
     if (!array1 || !array2) {
         return array1 === array2;
