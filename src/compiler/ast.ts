@@ -33,6 +33,7 @@ import {
     CompilerOptions,
     Diagnostic,
     Path,
+    ReadonlyMap,
     SourceLocation,
     Map as SymbolMap,
     bigint,
@@ -1731,7 +1732,7 @@ export class SourceUnitAnnotation extends ASTAnnotation {
     /// The "absolute" (in the compiler sense) path of this source unit.
     public path = "";
     /// The exported symbols (all global symbols).
-    public exportedSymbols: SymbolMap<Declaration[]> = new Map();
+    public exportedSymbols: ReadonlyMap<Declaration[]> = new Map();
     /// Experimental features.
     public experimentalFeatures: Set<ExperimentalFeature> = new Set();
 }
