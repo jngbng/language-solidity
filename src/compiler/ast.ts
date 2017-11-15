@@ -1357,6 +1357,19 @@ export class EventDefinition extends CallableDeclaration implements Documented {
 applyMixins(EventDefinition, [Documented]);
 
 /**
+ * Pseudo AST node that is used as declaration for "this", "msg", "tx", "block" and the global
+ * functions when such an identifier is encountered. Will never have a valid location in the source code.
+ */
+export class MagicVariableDeclaration extends Declaration {
+    constructor(name: string, public readonly type: Type) {
+        super(new SourceLocation(), name);
+    }
+    public accept(_visitor: ASTVisitor) {
+        Debug.assert(false, "MagicVariableDeclaration used inside real AST.");
+    }
+}
+
+/**
  * Definition of a function modifier.
  */
 export class ModifierDefinition extends CallableDeclaration implements Documented {
