@@ -2008,6 +2008,26 @@ export abstract class Type {
     /// List of member types (parameterised by scape), will be lazy-initialized.
     protected _members: Map<ContractDefinition, MemberList>;
 
+    public static forLiteral(literal: Literal) {
+        switch (literal.token) {
+            case TokenName.TrueLiteral:
+            case TokenName.FalseLiteral:
+                return new BoolType();
+            case TokenName.Number:
+                {
+                    const validLiteral = RationalNumberType.isValidLiteral(literal);
+                    if (validLiteral)
+                        return new RationalNumberType(validLiteral);
+                    else
+                        return undefined;
+                }
+            case TokenName.StringLiteral:
+                return new StringLiteralType(literal);
+            default:
+                return undefined;
+        }
+    }
+
     public static fromElementaryTypeName(name: string | ElementaryTypeNameToken): Type {
         if (isString(name)) {
             const characterCodes = stringToCharCodes(name);
