@@ -573,6 +573,12 @@ export abstract class Declaration extends ASTNode {
     /// contract types.
     /// This can only be called once types of variable declarations have already been resolved.
     public abstract get type(): Type;
+
+    /// @param _internal false indicates external interface is concerned, true indicates internal interface is concerned.
+    /// @returns null when it is not accessible as a function.
+    public functionType(_internal: boolean): FunctionType | undefined {
+        return undefined;
+    }
 }
 
 /**
@@ -633,6 +639,37 @@ export class FunctionDefinition extends CallableDeclaration implements Documente
 
     public get type(): Type { return FunctionType.newFromFunctionDefinition(this); }
 
+    public functionType(internal: boolean): FunctionType | undefined {
+        if (internal) {
+            switch (this.visibility) {
+                case Visibility.Default:
+                    Debug.assert(false, "visibility() should not return Default");
+                case Visibility.Private:
+                case Visibility.Internal:
+                case Visibility.Public:
+                    return FunctionType.newFromFunctionDefinition(this, internal);
+                case Visibility.External:
+                    return undefined;
+                default:
+                    Debug.assert(false, "visibility() should not return a Visibility");
+            }
+        }
+        else {
+            switch (this.visibility) {
+                case Visibility.Default:
+                    Debug.assert(false, "visibility() should not return Default");
+                case Visibility.Private:
+                case Visibility.Internal:
+                    return undefined;
+                case Visibility.Public:
+                case Visibility.External:
+                    return FunctionType.newFromFunctionDefinition(this, internal);
+                default:
+                    Debug.assert(false, "visibility() should not return a Visibility");
+            }
+        }
+    }
+
     public accept(visitor: ASTVisitor) {
         if (visitor.visitFunctionDefinition(this)) {
             this.parameterList.accept(visitor);
@@ -689,6 +726,23 @@ export class VariableDeclaration extends Declaration {
     }
 
     public get type(): Type { return this.annotation.type; }
+
+    public functionType(internal: boolean): FunctionType | undefined {
+        if (internal)
+            return undefined;
+        switch (this.visibility) {
+            case Visibility.Default:
+                Debug.assert(false, "visibility() should not return Default");
+            case Visibility.Private:
+            case Visibility.Internal:
+                return undefined;
+            case Visibility.Public:
+            case Visibility.External:
+                return FunctionType.newFromVariableDeclaration(this);
+            default:
+                Debug.assert(false, "visibility() should not return a Visibility");
+        }
+    }
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitVariableDeclaration(this)) {
@@ -1345,6 +1399,13 @@ export class EventDefinition extends CallableDeclaration implements Documented {
     }
 
     public get type(): Type { return FunctionType.newFromEventDefinition(this); }
+
+    public functionType(internal: boolean): FunctionType | undefined {
+        if (internal)
+            return FunctionType.newFromEventDefinition(this);
+        else
+            return undefined;
+    }
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitEventDefinition(this))
