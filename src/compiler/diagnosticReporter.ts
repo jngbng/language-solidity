@@ -1,4 +1,4 @@
-import { Diagnostic, DiagnosticCategory, SourceLocation } from "./types";
+import { Diagnostic, DiagnosticCategory, SecondarySourceLocation, SourceLocation } from "./types";
 
 export class DiagnosticReporter {
     private _diagnostics: Diagnostic[] = [];
@@ -7,16 +7,15 @@ export class DiagnosticReporter {
         return this._diagnostics;
     }
 
-    public error(type: DiagnosticCategory, description: string, location: SourceLocation) {
-        this._diagnostics.push(new Diagnostic(type, description, location));
+    public error(type: DiagnosticCategory, description: string, location: SourceLocation, secondarySourceLocation?: SecondarySourceLocation) {
+        this._diagnostics.push(new Diagnostic(type, description, location, secondarySourceLocation));
+    }
+    public warning(description: string, location?: SourceLocation, secondarySourceLocation?: SecondarySourceLocation) {
+        this.error(DiagnosticCategory.Warning, description, location, secondarySourceLocation);
     }
 
-    public warning(description: string, location?: SourceLocation) {
-        this.error(DiagnosticCategory.Warning, description, location);
-    }
-
-    public declarationError(description: string, location?: SourceLocation) {
-        this.error(DiagnosticCategory.DeclarationError, description, location);
+    public declarationError(description: string, location?: SourceLocation, secondarySourceLocation?: SecondarySourceLocation) {
+        this.error(DiagnosticCategory.DeclarationError, description, location, secondarySourceLocation);
     }
 
     public parserError(description: string, location?: SourceLocation) {
@@ -36,8 +35,8 @@ export class DiagnosticReporter {
         this.error(DiagnosticCategory.SyntaxError, description, location);
     }
 
-    public typeError(description: string, location?: SourceLocation) {
-        this.error(DiagnosticCategory.TypeError, description, location);
+    public typeError(description: string, location?: SourceLocation, secondarySourceLocation?: SecondarySourceLocation) {
+        this.error(DiagnosticCategory.TypeError, description, location, secondarySourceLocation);
     }
 
     public docstringParsingError(description: string) {

@@ -179,6 +179,15 @@ export class SourceLocation {
     }
 }
 
+export class SecondarySourceLocation {
+    public readonly infos: [SourceLocation, string][] = [];
+
+    public append(sourceLocation: SourceLocation, errMsg: string) {
+        this.infos.push([sourceLocation, errMsg]);
+        return this;
+    }
+}
+
 export const enum DiagnosticCategory {
     DeclarationError,
     DocstringParsingError,
@@ -192,7 +201,8 @@ export class Diagnostic {
     constructor(
         public readonly category: DiagnosticCategory,
         public readonly desription: string,
-        public readonly location = new SourceLocation()) {
+        public readonly location = new SourceLocation(),
+        public readonly secondaryLocation?: SecondarySourceLocation) {
     }
 }
 
