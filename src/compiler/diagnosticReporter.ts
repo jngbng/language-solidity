@@ -31,6 +31,14 @@ export class DiagnosticReporter {
         this.fatalError(DiagnosticCategory.ParserError, description, location);
     }
 
+    public fatalTypeError(description: string, location?: SourceLocation) {
+        this.fatalError(DiagnosticCategory.TypeError, description, location);
+    }
+
+    public fatalDeclarationError(description: string, location?: SourceLocation) {
+        this.fatalError(DiagnosticCategory.DeclarationError, description, location);
+    }
+
     public syntaxError(description: string, location?: SourceLocation) {
         this.error(DiagnosticCategory.SyntaxError, description, location);
     }
