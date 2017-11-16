@@ -17,11 +17,9 @@ import * as fs from "fs";
 
 import {
     ASTVisitor,
-    CharStream,
     ContractDefinition,
     DiagnosticReporter,
     Parser,
-    Scanner,
     SourceUnit
 } from "../src";
 
