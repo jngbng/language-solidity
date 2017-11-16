@@ -2190,7 +2190,7 @@ export abstract class Type {
         return targetType.dataStoredIn(DataLocation.Storage) ? this.mobileType : targetType;
     }
 
-    public abstract toString(short: boolean): string;
+    public abstract toString(short?: boolean): string;
 
     /// @returns the canonical name of this type for use in library function signatures.
     public get canonicalName(): string { return this.toString(true); }
