@@ -96,6 +96,11 @@ export abstract class ASTNode {
         idDispenser.reset();
     }
 
+    public static listAccept<T extends ASTNode>(list: ReadonlyArray<T>, visitor: ASTVisitor) {
+        for (const element of list)
+            element.accept(visitor);
+    }
+
     private _id: number;
 
     private _location: SourceLocation;
@@ -123,11 +128,6 @@ export abstract class ASTNode {
     public abstract accept(visitor: ASTVisitor): void;
 }
 
-function listAccept<T extends ASTNode>(list: ReadonlyArray<T>, visitor: ASTVisitor) {
-    for (const element of list)
-        element.accept(visitor);
-}
-
 export class SourceUnit extends ASTNode {
     constructor(
         location: SourceLocation,
@@ -145,7 +145,7 @@ export class SourceUnit extends ASTNode {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitSourceUnit(this))
-            listAccept(this.nodes, visitor);
+            ASTNode.listAccept(this.nodes, visitor);
         visitor.endVisitSourceUnit(this);
     }
 }
@@ -319,7 +319,7 @@ export class FunctionCall extends Expression {
     public accept(visitor: ASTVisitor) {
         if (visitor.visitFunctionCall(this)) {
             this.expression.accept(visitor);
-            listAccept(this.args, visitor);
+            ASTNode.listAccept(this.args, visitor);
         }
         visitor.endVisitFunctionCall(this);
     }
@@ -676,7 +676,7 @@ export class FunctionDefinition extends CallableDeclaration implements Documente
             this.parameterList.accept(visitor);
             if (this.returnParameterList)
                 this.returnParameterList.accept(visitor);
-            listAccept(this.modifiers, visitor);
+            ASTNode.listAccept(this.modifiers, visitor);
             if (this.body)
                 this.body.accept(visitor);
         }
@@ -853,7 +853,7 @@ export class ModifierInvocation extends ASTNode {
     public accept(visitor: ASTVisitor) {
         if (visitor.visitModifierInvocation(this)) {
             this.name.accept(visitor);
-            listAccept(this.args, visitor);
+            ASTNode.listAccept(this.args, visitor);
         }
         visitor.endVisitModifierInvocation(this);
     }
@@ -874,7 +874,7 @@ export class ParameterList extends ASTNode {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitParameterList(this))
-            listAccept(this.parameters, visitor);
+            ASTNode.listAccept(this.parameters, visitor);
         visitor.endVisitParameterList(this);
     }
 }
@@ -890,7 +890,7 @@ export class InheritanceSpecifier extends ASTNode {
     public accept(visitor: ASTVisitor) {
         if (visitor.visitInheritanceSpecifier(this)) {
             this.name.accept(visitor);
-            listAccept(this.args, visitor);
+            ASTNode.listAccept(this.args, visitor);
         }
         visitor.endVisitInheritanceSpecifier(this);
     }
@@ -931,7 +931,7 @@ export class Block extends Statement {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitBlock(this))
-            listAccept(this.statements, visitor);
+            ASTNode.listAccept(this.statements, visitor);
         visitor.endVisitBlock(this);
     }
 }
@@ -1204,8 +1204,8 @@ export class ContractDefinition extends Declaration implements Documented {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitContractDefinition(this)) {
-            listAccept(this.baseContracts, visitor);
-            listAccept(this.subNodes, visitor);
+            ASTNode.listAccept(this.baseContracts, visitor);
+            ASTNode.listAccept(this.subNodes, visitor);
         }
         visitor.endVisitContractDefinition(this);
     }
@@ -1507,7 +1507,7 @@ export class StructDefinition extends Declaration {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitStructDefinition(this)) {
-            listAccept(this.members, visitor);
+            ASTNode.listAccept(this.members, visitor);
         }
         visitor.endVisitStructDefinition(this);
     }
@@ -1534,7 +1534,7 @@ export class EnumDefinition extends Declaration {
 
     public accept(visitor: ASTVisitor) {
         if (visitor.visitEnumDefinition(this)) {
-            listAccept(this.members, visitor);
+            ASTNode.listAccept(this.members, visitor);
         }
         visitor.endVisitEnumDefinition(this);
     }
