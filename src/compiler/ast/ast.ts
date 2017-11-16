@@ -1210,25 +1210,25 @@ export class ContractDefinition extends Declaration implements Documented {
         visitor.endVisitContractDefinition(this);
     }
 
-    public usingForDirectives(): ReadonlyArray<UsingForDirective> {
+    public get usingForDirectives(): ReadonlyArray<UsingForDirective> {
         return filteredNodes(UsingForDirective, this.subNodes);
     }
-    public definedStructs(): ReadonlyArray<StructDefinition> {
+    public get definedStructs(): ReadonlyArray<StructDefinition> {
         return filteredNodes(StructDefinition, this.subNodes);
     }
-    public definedEnums(): ReadonlyArray<EnumDefinition> {
+    public get definedEnums(): ReadonlyArray<EnumDefinition> {
         return filteredNodes(EnumDefinition, this.subNodes);
     }
-    public stateVariables(): ReadonlyArray<VariableDeclaration> {
+    public get stateVariables(): ReadonlyArray<VariableDeclaration> {
         return filteredNodes(VariableDeclaration, this.subNodes);
     }
-    public functionModifiers(): ReadonlyArray<ModifierDefinition> {
+    public get functionModifiers(): ReadonlyArray<ModifierDefinition> {
         return filteredNodes(ModifierDefinition, this.subNodes);
     }
-    public definedFunctions(): ReadonlyArray<FunctionDefinition> {
+    public get definedFunctions(): ReadonlyArray<FunctionDefinition> {
         return filteredNodes(FunctionDefinition, this.subNodes);
     }
-    public events(): ReadonlyArray<EventDefinition> {
+    public get events(): ReadonlyArray<EventDefinition> {
         return filteredNodes(EventDefinition, this.subNodes);
     }
 
@@ -1256,11 +1256,11 @@ export class ContractDefinition extends Declaration implements Documented {
             this._interfaceFunctionList = [];
             for (const contract of this.annotation.linearizedBaseContracts) {
                 const functions: FunctionType[] = [];
-                for (const f of contract.definedFunctions()) {
+                for (const f of contract.definedFunctions) {
                     if (f.isPartOfExternalInterface())
                         functions.push(FunctionType.newFromFunctionDefinition(f, false));
                 }
-                for (const v of contract.stateVariables()) {
+                for (const v of contract.stateVariables) {
                     if (v.isPartOfExternalInterface())
                         functions.push(FunctionType.newFromVariableDeclaration(v));
                 }
@@ -1293,27 +1293,27 @@ export class ContractDefinition extends Declaration implements Documented {
                 }
             };
 
-            for (const f of this.definedFunctions())
+            for (const f of this.definedFunctions)
                 addInheritableMember(f);
 
-            for (const v of this.stateVariables())
+            for (const v of this.stateVariables)
                 addInheritableMember(v);
 
-            for (const s of this.definedStructs())
+            for (const s of this.definedStructs)
                 addInheritableMember(s);
 
-            for (const e of this.definedEnums())
+            for (const e of this.definedEnums)
                 addInheritableMember(e);
 
-            for (const e of this.events())
+            for (const e of this.events)
                 addInheritableMember(e);
         }
         return this._inheritableMembers;
     }
 
     /// Returns the constructor or undefined if no constructor was specified.
-    public constructorFunction(): FunctionDefinition | undefined {
-        for (const f of this.definedFunctions()) {
+    public get constructorFunction(): FunctionDefinition | undefined {
+        for (const f of this.definedFunctions) {
             if (f.isConstructor())
                 return f;
         }
@@ -1321,14 +1321,14 @@ export class ContractDefinition extends Declaration implements Documented {
 
     /// @returns true iff the constructor of this contract is public (or non-existing).
     public constructorIsPublic(): boolean {
-        const f = this.constructorFunction();
+        const f = this.constructorFunction;
         return !f || f.isPublic();
     }
 
     /// Returns the fallback function or nullptr if no fallback function was specified.
     public get fallbackFunction(): FunctionDefinition | undefined {
         for (const contract of this.annotation.linearizedBaseContracts) {
-            for (const f of contract.definedFunctions()) {
+            for (const f of contract.definedFunctions) {
                 if (f.isFallback())
                     return f;
             }
@@ -2235,13 +2235,13 @@ function boundFunctions(_type: Type, scope: ContractDefinition): MemberMap {
     const seenFunctions = new Set<Declaration>();
     const members: MemberMap = [];
     for (const contract of scope.annotation.linearizedBaseContracts) {
-        for (const ufd of contract.usingForDirectives()) {
+        for (const ufd of contract.usingForDirectives) {
             if (ufd.typeName &&
                 !type.equals(ReferenceType.copyForLocationIfReference(DataLocation.Storage, ufd.typeName.annotation.type)))
                 continue;
 
             const library = ufd.libraryName.annotation.referencedDeclaration as ContractDefinition;
-            for (const funDecl of library.definedFunctions()) {
+            for (const funDecl of library.definedFunctions) {
                 if (!funDecl.isVisibleInDerivedContracts() || seenFunctions.has(funDecl))
                     continue;
                 seenFunctions.add(funDecl);
@@ -3409,7 +3409,7 @@ export class ContractType extends Type {
             Debug.assert(bases.length >= 1, "linearizedBaseContracts should at least contain the most derived contract.");
             // `sliced(1, ...)` ignores the most derived contract, which should not be searchable from `super`.
             for (const base of bases.slice(1)) {
-                for (const funDef of base.definedFunctions()) {
+                for (const funDef of base.definedFunctions) {
                     if (!funDef.isVisibleInDerivedContracts())
                         continue;
                     const functionType = FunctionType.newFromFunctionDefinition(funDef, true);
@@ -3476,7 +3476,7 @@ export class ContractType extends Type {
     public get stateVariables(): [VariableDeclaration, u256, number][] {
         const variables: VariableDeclaration[] = [];
         for (const contract of this.contractDefinition.annotation.linearizedBaseContracts.reverse()) {
-            for (const variable of contract.stateVariables())
+            for (const variable of contract.stateVariables)
                 if (!variable.isConstant())
                     variables.push(variable);
         }
@@ -4181,7 +4181,7 @@ export class FunctionType extends Type {
 
     /// @returns the type of the "new Contract" function, i.e. basically the constructor.
     public static newExpressionType(contract: ContractDefinition): FunctionType {
-        const constructor = contract.constructorFunction();
+        const constructor = contract.constructorFunction;
         const parameters: Type[] = [];
         const parameterNames: string[] = [];
         let stateMutability = StateMutability.NonPayable;
@@ -4791,7 +4791,7 @@ export class TypeType extends Type {
                 isBase = contains(currentBases, contract);
             }
             if (contract.isLibrary()) {
-                for (const fun of contract.definedFunctions()) {
+                for (const fun of contract.definedFunctions) {
                     if (fun.isVisibleInDerivedContracts())
                         members.push(new Member(
                             fun.name,
@@ -4807,9 +4807,9 @@ export class TypeType extends Type {
                     members.push(new Member(decl.name, decl.type, decl));
             }
             else {
-                for (const stru of contract.definedStructs())
+                for (const stru of contract.definedStructs)
                     members.push(new Member(stru.name, stru.type, stru));
-                for (const enu of contract.definedEnums())
+                for (const enu of contract.definedEnums)
                     members.push(new Member(enu.name, enu.type, enu));
             }
         }

@@ -265,7 +265,7 @@ test("function_natspec_documentation", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     const fun = funs[0];
     expect(fun).toBeTruthy();
     checkFunctionNatspec(fun, "This is a test function");
@@ -281,7 +281,7 @@ test("function_normal_comments", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     const fun = funs[0];
     expect(fun).toBeTruthy();
     expect(fun.documentation()).toBeFalsy();
@@ -303,7 +303,7 @@ test("multiple_functions_natspec_documentation", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
 
     let fun: FunctionDefinition;
 
@@ -335,7 +335,7 @@ test("multiline_function_documentation", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     const fun = funs[0];
     checkFunctionNatspec(fun, "This is a test function\n" +
         " and it has 2 lines");
@@ -359,7 +359,7 @@ test("natspec_comment_in_function_body", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     let fun: FunctionDefinition;
 
     fun = funs[0];
@@ -388,7 +388,7 @@ test("natspec_docstring_between_keyword_and_signature", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     const fun = funs[0];
     expect(fun).toBeTruthy();
     expect(fun.documentation()).toBeFalsy();
@@ -410,7 +410,7 @@ test("natspec_docstring_after_signature", () => {
 	`;
     expect(successParse(text)).toBeTruthy();
     const { node: contract } = parseText(text);
-    const funs = contract.definedFunctions();
+    const funs = contract.definedFunctions;
     const fun = funs[0];
 
     expect(fun).toBeTruthy();
