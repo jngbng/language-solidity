@@ -1,10 +1,14 @@
 Language Solidity
 =================
-[![Build Status](https://travis-ci.org/CodeChain-io/language-solidity.svg?branch=master)](https://travis-ci.org/CodeChain-io/language-solidity)
+[![Build Status](https://travis-ci.org/CodeChain-io/language-solidity.svg?branch=master)](https://travis-ci.org/CodeChain-io/language-solidity) [![npm version](https://badge.fury.io/js/language-solidity.svg)](https://badge.fury.io/js/language-solidity)
 
-A Solidity parser written in TypeScript.
+Tools for parsing and analysis of Solidity code.
 
 # Usage
+
+```
+$ npm install language-solidity
+```
 
 The following code snippet prints the contract names contained in `MetaCoin.sol`.
 
@@ -46,3 +50,14 @@ function main() {
 
 main();
 ```
+
+# Test
+
+In a checkout of the project, run:
+
+```
+$ npm test
+```
+
+# License
+Apache-2
