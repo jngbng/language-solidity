@@ -1,4 +1,4 @@
-import { Diagnostic, DiagnosticCategory, SecondarySourceLocation, SourceLocation } from "./types";
+import { Diagnostic, DiagnosticCategory, SecondarySourceLocation, SourceLocation } from "../types";
 
 export class DiagnosticReporter {
     private _diagnostics: Diagnostic[] = [];

@@ -1,26 +1,28 @@
 import * as semver from "semver";
 
 import {
+    ASTNode,
     Break,
     Continue,
     ForStatement,
     FunctionDefinition,
     FunctionTypeName,
+    ModifierDefinition,
     PlaceholderStatement,
     PragmaDirective,
     SourceUnit,
     Throw,
     UnaryOperation,
-    WhileStatement
-} from "../compiler/ast";
-import { ASTNode, ModifierDefinition, visibilityToString } from "../compiler/ast";
-import { ASTVisitor } from "../compiler/astVisitor";
-import { Debug } from "../compiler/core";
-import { DiagnosticReporter } from "../compiler/diagnosticReporter";
-import { ExperimentalFeature, experimentalFeatureNames } from "../compiler/experimentalFeatures";
-import { TokenName } from "../compiler/token";
-import { containsOnlyWarnings } from "../compiler/types";
+    WhileStatement,
+    visibilityToString
+} from "../ast/ast";
+import { ASTVisitor } from "../ast/astVisitor";
+import { ExperimentalFeature, experimentalFeatureNames } from "../ast/experimentalFeatures";
+import { Debug } from "../core";
+import { DiagnosticReporter } from "../interface/diagnosticReporter";
 import { versionString } from "../interface/version";
+import { TokenName } from "../parsing/token";
+import { containsOnlyWarnings } from "../types";
 
 /**
  * The module that performs syntax analysis on the AST:

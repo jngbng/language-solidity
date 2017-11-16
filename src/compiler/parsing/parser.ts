@@ -53,10 +53,11 @@ import {
     WhileStatement,
     stateMutabilityToString,
     visibilityToString
-} from "./ast";
-import { Debug, clone, first, last } from "./core";
-import { DiagnosticReporter } from "./diagnosticReporter";
-import { CharStream, Scanner } from "./scanner";
+} from "../ast/ast";
+import { Debug, clone, first, last } from "../core";
+import { DiagnosticReporter } from "../interface/diagnosticReporter";
+import { CharStream, Scanner } from "../parsing/scanner";
+import { SourceLocation } from "../types";
 import {
     ElementaryTypeNameToken,
     TokenName,
@@ -75,7 +76,6 @@ import {
     tokenToName,
     tokenToString
 } from "./token";
-import { SourceLocation } from "./types";
 
 export class ParserBase {
     protected diagnosticReporter: DiagnosticReporter;

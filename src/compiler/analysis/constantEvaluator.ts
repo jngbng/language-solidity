@@ -6,10 +6,10 @@ import {
     RationalNumberType,
     Type,
     UnaryOperation
-} from "../compiler/ast";
-import { ASTVisitor } from "../compiler/astVisitor";
-import { DiagnosticReporter } from "../compiler/diagnosticReporter";
-import { isCompareOp } from "../compiler/token";
+} from "../ast/ast";
+import { ASTVisitor } from "../ast/astVisitor";
+import { DiagnosticReporter } from "../interface/diagnosticReporter";
+import { isCompareOp } from "../parsing/token";
 
 /**
  * Small drop-in replacement for TypeChecker to evaluate simple expressions of integer constants.

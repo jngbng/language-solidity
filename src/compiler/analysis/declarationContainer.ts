@@ -4,9 +4,9 @@ import {
     EventDefinition,
     FunctionDefinition,
     VariableDeclaration
-} from "../compiler/ast";
-import { Debug, contains, createMap, first } from "../compiler/core";
-import { Map, ReadonlyMap } from "../compiler/types";
+} from "../ast/ast";
+import { Debug, contains, createMap, first } from "../core";
+import { Map, ReadonlyMap } from "../types";
 
 /**
  * Container that stores mappings between names and declarations. It also contains a link to the

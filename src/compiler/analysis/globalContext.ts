@@ -9,7 +9,7 @@ import {
     MagicType,
     MagicVariableDeclaration,
     StateMutability
-} from "../compiler/ast";
+} from "../ast/ast";
 
 /**
  * Container for all global objects which look like AST nodes, but are not part of the AST

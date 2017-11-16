@@ -1,3 +1,4 @@
+import { tokenToString } from "../parsing/token";
 import {
     ASTNode,
     ArrayTypeName,
@@ -44,7 +45,6 @@ import {
     WhileStatement
 } from "./ast";
 import { ASTVisitor } from "./astVisitor";
-import { tokenToString } from "./token";
 
 export interface LineWriter {
     writeLine(s: string): void;

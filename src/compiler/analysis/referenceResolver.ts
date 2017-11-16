@@ -28,12 +28,12 @@ import {
     UserDefinedTypeName,
     VariableDeclaration,
     Visibility
-} from "../compiler/ast";
-import { ASTVisitor } from "../compiler/astVisitor";
-import { Debug, first, last } from "../compiler/core";
-import { DiagnosticReporter } from "../compiler/diagnosticReporter";
-import { ExperimentalFeature } from "../compiler/experimentalFeatures";
-import { SourceLocation } from "../compiler/types";
+} from "../ast/ast";
+import { ASTVisitor } from "../ast/astVisitor";
+import { ExperimentalFeature } from "../ast/experimentalFeatures";
+import { Debug, first, last } from "../core";
+import { DiagnosticReporter } from "../interface/diagnosticReporter";
+import { SourceLocation } from "../types";
 import { ConstantEvaluator } from "./constantEvaluator";
 import { NameAndTypeResolver } from "./nameAndTypeResolver";
 

@@ -1,5 +1,5 @@
-import { createMapFromTemplate } from "./core";
-import { Map } from "./types";
+import { createMapFromTemplate } from "../core";
+import { Map } from "../types";
 
 export const enum ExperimentalFeature {
     SMTChecker,

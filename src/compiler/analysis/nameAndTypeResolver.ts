@@ -15,11 +15,11 @@ import {
     VariableDeclaration,
     VariableDeclarationStatement,
     VariableScope
-} from "../compiler/ast";
-import { ASTVisitor } from "../compiler/astVisitor";
-import { Debug, findIndex, first, last, removeWhere } from "../compiler/core";
-import { DiagnosticReporter } from "../compiler/diagnosticReporter";
-import { SecondarySourceLocation, SourceLocation } from "../compiler/types";
+} from "../ast/ast";
+import { ASTVisitor } from "../ast/astVisitor";
+import { Debug, findIndex, first, last, removeWhere } from "../core";
+import { DiagnosticReporter } from "../interface/diagnosticReporter";
+import { SecondarySourceLocation, SourceLocation } from "../types";
 import { DeclarationContainer } from "./declarationContainer";
 import { ReferencesResolver } from "./referenceResolver";
 

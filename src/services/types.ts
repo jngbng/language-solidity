@@ -1,4 +1,4 @@
-import { Program } from "../compiler/ast";
+import { Program } from "../compiler/ast/ast";
 import { CompilerOptions, Diagnostic } from "../compiler/types";
 
 //

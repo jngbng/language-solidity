@@ -1,6 +1,6 @@
-import { Debug, clone, } from "./core";
-import { ElementaryTypeNameToken, TokenName, fromIdentifierOrKeyword } from "./token";
-import { CharacterCodes, SourceLocation } from "./types";
+import { Debug, clone, } from "../core";
+import { ElementaryTypeNameToken, TokenName, fromIdentifierOrKeyword } from "../parsing/token";
+import { CharacterCodes, SourceLocation } from "../types";
 
 function isDecimalDigit(c: number): boolean {
     return CharacterCodes._0 <= c && c <= CharacterCodes._9;

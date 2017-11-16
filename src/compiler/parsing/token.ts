@@ -1,5 +1,5 @@
-import { Debug, createMapFromTemplate, every, findIndex } from "./core";
-import { CharacterCodes, Map } from "./types";
+import { Debug, createMapFromTemplate, every, findIndex } from "../core";
+import { CharacterCodes, Map } from "../types";
 
 export enum TokenName {
     // End of source indicator.

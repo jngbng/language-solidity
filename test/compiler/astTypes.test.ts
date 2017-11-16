@@ -29,8 +29,8 @@ import {
     StructDefinition,
     TupleType,
     Type
-} from "../../src/compiler/ast";
-import { TokenName } from "../../src/compiler/token";
+} from "../../src/compiler/ast/ast";
+import { TokenName } from "../../src/compiler/parsing/token";
 import { SourceLocation } from "../../src/compiler/types";
 
 test("storage_layout_simple", () => {

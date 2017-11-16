@@ -1,6 +1,5 @@
 import { BigNumber as BN } from "bignumber.js";
 
-import { ASTVisitor } from "./astVisitor";
 import {
     Debug,
     MultiMap,
@@ -13,8 +12,7 @@ import {
     firstOrUndefined,
     isString,
     lastOrUndefined
-} from "./core";
-import { ExperimentalFeature } from "./experimentalFeatures";
+} from "../core";
 import {
     ElementaryTypeNameToken,
     TokenName,
@@ -27,7 +25,7 @@ import {
     isElementaryTypeName,
     isShiftOp,
     isUnaryOp
-} from "./token";
+} from "../parsing/token";
 import {
     CancellationToken,
     CompilerOptions,
@@ -39,7 +37,9 @@ import {
     bigint,
     rational,
     u256
-} from "./types";
+} from "../types";
+import { ASTVisitor } from "./astVisitor";
+import { ExperimentalFeature } from "./experimentalFeatures";
 
 const util = require("ethereumjs-util");
 

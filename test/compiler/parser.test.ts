@@ -1,7 +1,7 @@
-import { ContractDefinition, FunctionDefinition } from "../../src/compiler/ast";
-import { DiagnosticReporter } from "../../src/compiler/diagnosticReporter";
-import { Parser } from "../../src/compiler/parser";
-import { CharStream, Scanner } from "../../src/compiler/scanner";
+import { ContractDefinition, FunctionDefinition } from "../../src/compiler/ast/ast";
+import { DiagnosticReporter } from "../../src/compiler/interface/diagnosticReporter";
+import { Parser } from "../../src/compiler/parsing/parser";
+import { CharStream, Scanner } from "../../src/compiler/parsing/scanner";
 import {
     Diagnostic,
     DiagnosticCategory,
