@@ -2009,6 +2009,17 @@ export abstract class Type {
     /// List of member types (parameterised by scape), will be lazy-initialized.
     protected _members: Map<ContractDefinition, MemberList>;
 
+    public static commonType(a: Type, b: Type): Type | undefined {
+        if (!a || !b)
+            return undefined;
+        else if (a.mobileType && b.isImplicitlyConvertibleTo(a.mobileType))
+            return a.mobileType;
+        else if (b.mobileType && a.isImplicitlyConvertibleTo(b.mobileType))
+            return b.mobileType;
+        else
+            return undefined;
+    }
+
     public static forLiteral(literal: Literal) {
         switch (literal.token) {
             case TokenName.TrueLiteral:
@@ -2107,7 +2118,7 @@ export abstract class Type {
     /// this is not possible.
     /// The default implementation allows comparison operators if a common type exists
     public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
-        return isCompareOp(operator) ? commonType(this, other) : undefined;
+        return isCompareOp(operator) ? Type.commonType(this, other) : undefined;
     }
 
     public equals(other: Type): boolean { return this.category === other.category; }
@@ -2257,17 +2268,6 @@ function boundFunctions(_type: Type, scope: ContractDefinition): MemberMap {
     return members;
 }
 
-export function commonType(a: Type, b: Type): Type | undefined {
-    if (!a || !b)
-        return undefined;
-    else if (a.mobileType && b.isImplicitlyConvertibleTo(a.mobileType))
-        return a.mobileType;
-    else if (b.mobileType && a.isImplicitlyConvertibleTo(b.mobileType))
-        return b.mobileType;
-    else
-        return undefined;
-}
-
 export const enum IntegerTypeModifier {
     Unsigned, Signed, Address
 }
@@ -2366,28 +2366,28 @@ export class IntegerType extends Type {
                 return undefined;
         }
 
-        const _commonType = commonType(this, other); //might be a integer or fixed point
-        if (!_commonType)
+        const commonType = Type.commonType(this, other); //might be a integer or fixed point
+        if (!commonType)
             return undefined;
 
         // All integer types can be compared
         if (isCompareOp(operator))
-            return _commonType;
+            return commonType;
         if (isBooleanOp(operator))
             return undefined;
-        if (_commonType instanceof IntegerType) {
+        if (commonType instanceof IntegerType) {
             // Nothing else can be done with addresses
-            if (_commonType.isAddress())
+            if (commonType.isAddress())
                 return undefined;
             // Signed EXP is not allowed
-            if (TokenName.Exp === operator && _commonType.isSigned())
+            if (TokenName.Exp === operator && commonType.isSigned())
                 return undefined;
         }
-        else if (_commonType instanceof FixedPointType) {
+        else if (commonType instanceof FixedPointType) {
             if (TokenName.Exp === operator)
                 return undefined;
         }
-        return _commonType;
+        return commonType;
     }
 
     public calldataEncodedSize(padded = true): number { return padded ? 32 : Math.floor(this.bits / 8); }
@@ -2547,25 +2547,25 @@ export class FixedPointType extends Type {
             other.category !== TypeCategory.Integer)
             return undefined;
 
-        const _commonType = commonType(this, other); //might be fixed point or integer
-        if (!_commonType)
+        const commonType = Type.commonType(this, other); //might be fixed point or integer
+        if (!commonType)
             return undefined;
 
         // All fixed types can be compared
         if (isCompareOp(operator))
-            return _commonType;
+            return commonType;
         if (isBitOp(operator) || isBooleanOp(operator))
             return undefined;
 
-        if (_commonType instanceof FixedPointType) {
+        if (commonType instanceof FixedPointType) {
             if (TokenName.Exp === operator)
                 return undefined;
         }
-        else if (_commonType instanceof IntegerType) {
-            if (_commonType.isAddress())
+        else if (commonType instanceof IntegerType) {
+            if (commonType.isAddress())
                 return undefined;
         }
-        return _commonType;
+        return commonType;
     }
 
     public calldataEncodedSize(padded = true): number { return padded ? 32 : Math.floor(this.numBits / 8); }
@@ -2862,13 +2862,13 @@ export class FixedBytesType extends Type {
                 return undefined;
         }
 
-        const _commonType = commonType(this, other) as FixedBytesType;
-        if (!_commonType)
+        const commonType = Type.commonType(this, other) as FixedBytesType;
+        if (!commonType)
             return undefined;
 
         // FixedBytes can be compared and have bitwise operators applied to them
         if (isCompareOp(operator) || isBitOp(operator))
-            return _commonType;
+            return commonType;
 
         return undefined;
     }
@@ -4318,7 +4318,7 @@ export class FunctionType extends Type {
 
         if (this.kind === FunctionKind.Internal && other.kind === FunctionKind.Internal &&
             this.sizeOnStack === 1 && other.sizeOnStack === 1)
-            return commonType(this, other);
+            return Type.commonType(this, other);
 
         return undefined;
     }
