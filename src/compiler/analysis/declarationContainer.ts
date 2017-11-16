@@ -5,23 +5,22 @@ import {
     FunctionDefinition,
     VariableDeclaration
 } from "../ast/ast";
-import { Debug, contains, createMap, first } from "../core";
-import { Map, ReadonlyMap } from "../types";
+import { Debug, MultiMap, contains, createMultiMap, first } from "../core";
 
 /**
  * Container that stores mappings between names and declarations. It also contains a link to the
  * enclosing scope.
  */
 export class DeclarationContainer {
-    private _declarations: Map<Declaration[]> = createMap();
-    private invisibleDeclarations: Map<Declaration[]> = createMap();
+    private _declarations: MultiMap<Declaration> = createMultiMap();
+    private invisibleDeclarations: MultiMap<Declaration> = createMultiMap();
 
     constructor(
         public readonly enclosingNode?: ASTNode,
         public readonly enclosingContainer?: DeclarationContainer) {
     }
 
-    public get declarations(): ReadonlyMap<Declaration[]> {
+    public get declarations(): MultiMap<Declaration> {
         return this._declarations;
     }
 
@@ -45,9 +44,15 @@ export class DeclarationContainer {
         else if (this.conflictingDeclaration(declaration, name))
             return false;
 
-        const decls = invisible ? this.invisibleDeclarations.get(name) : this._declarations.get(name);
-        if (!contains(decls, declaration))
-            decls.push(declaration);
+        if (invisible) {
+            const decls = this.invisibleDeclarations.get(name);
+            if (!contains(decls, declaration))
+                this.invisibleDeclarations.add(name, declaration);
+        } else {
+            const decls = this._declarations.get(name);
+            if (!contains(decls, declaration))
+                this._declarations.add(name, declaration);
+        }
         return true;
     }
 
