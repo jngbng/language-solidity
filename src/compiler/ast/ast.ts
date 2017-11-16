@@ -1853,13 +1853,13 @@ export class ContractDefinitionAnnotation extends TypeDeclarationAnnotation impl
     public docTags: MultiMap<DocTag>;
 
     /// List of functions without a body. Can also contain functions from base classes.
-    public unimplementedFunctions: FunctionDefinition[];
+    public unimplementedFunctions: FunctionDefinition[] = [];
     /// List of all (direct and indirect) base contracts in order from derived to
     /// base, including the contract itself.
-    public linearizedBaseContracts: ContractDefinition[];
+    public linearizedBaseContracts: ContractDefinition[] = [];
     /// List of contracts this contract creates, i.e. which need to be compiled first.
     /// Also includes all contracts from @a linearizedBaseContracts.
-    public contractDependencies: ContractDefinition[];
+    public contractDependencies: ContractDefinition[] = [];
 }
 applyMixins(StatementAnnotation, [DocumentedAnnotation]);
 
