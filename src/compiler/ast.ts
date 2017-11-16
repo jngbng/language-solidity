@@ -2201,7 +2201,7 @@ export abstract class Type {
         return this.canonicalName;
     }
 
-    public literalValue(_contract: Literal): u256 {
+    public literalValue(_contract?: Literal): u256 {
         Debug.assert(false, "Literal value requested for type without literals.");
         return new BN(0);
     }
@@ -2444,7 +2444,7 @@ export class IntegerType extends Type {
         return prefix + this.bits;
     }
 
-    public literalValue(literal: Literal): u256 {
+    public literalValue(literal?: Literal): u256 {
         Debug.assert(this.modifier === IntegerTypeModifier.Address);
         Debug.assert(!!literal);
         Debug.assert(literal.value.substr(0, 2) === "0x");
@@ -2671,7 +2671,7 @@ export class RationalNumberType extends Type {
         return "rational_const " + numerator + '/' + denominator;
     }
 
-    public literalValue(_literal: Literal): u256 {
+    public literalValue(_literal?: Literal): u256 {
         throw new Error("Not implemented");
     }
 
@@ -2917,7 +2917,7 @@ export class BoolType extends Type {
     public isValueType(): boolean { return true; }
 
     public toString(_short: boolean): string { return "bool"; }
-    public literalValue(literal: Literal): u256 {
+    public literalValue(literal?: Literal): u256 {
         Debug.assert(!!literal);
         if (literal.token === TokenName.TrueLiteral)
             return new BN(1);
