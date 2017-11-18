@@ -290,9 +290,7 @@ export class Parser extends ParserBase {
         return LookAheadInfo.ExpressionStatement;
     }
 
-    public parseSourceFile(fileName: string, sourceText: string): SourceUnit {
-        const scanner = new Scanner(new CharStream(sourceText), fileName);
-
+    public parse(scanner: Scanner, sourceText = ""): SourceUnit {
         const withRecursionGuard = <T>(f: () => T): T => {
             try {
                 return f();
@@ -334,6 +332,11 @@ export class Parser extends ParserBase {
                 throw new Error("Something went wrong"); // Something is weird here, rather throw again.
             return undefined;
         }
+    }
+
+    public parseSourceFile(fileName: string, sourceText: string): SourceUnit {
+        const scanner = new Scanner(new CharStream(sourceText), fileName);
+        return this.parse(scanner, sourceText);
     }
 
     private parsePragmaDirective() {
