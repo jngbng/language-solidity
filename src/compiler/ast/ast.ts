@@ -4159,10 +4159,10 @@ export class FunctionType extends Type {
         private readonly _declaration?: Declaration,
         public readonly gasSet = false,
         public readonly valueSet = false,
-        public readonly _bound = false
+        public readonly bound = false
     ) {
         super();
-        Debug.assert(!_bound || parameterTypes.length !== 0,
+        Debug.assert(!bound || parameterTypes.length !== 0,
             "Attempted construction of bound function without self type");
 
         if (parameterTypes.length !== 0 && isString(parameterTypes[0])) {
@@ -4209,12 +4209,12 @@ export class FunctionType extends Type {
     }
 
     public get parameterTypes(): Type[] {
-        if (!this._bound)
+        if (!this.bound)
             return this._parameterTypes;
         return this._parameterTypes.slice(1);
     }
     public get parameterNames(): string[] {
-        if (!this._bound)
+        if (!this.bound)
             return this._parameterNames;
         return this._parameterNames.slice(1);
     }
@@ -4223,7 +4223,7 @@ export class FunctionType extends Type {
 
     /// @returns the "self" parameter type for a bound function
     public get selfType(): Type {
-        Debug.assert(this._bound, "Function is not bound.");
+        Debug.assert(this.bound, "Function is not bound.");
         Debug.assert(this.parameterTypes.length > 0, "Function has no self type.");
         return this.parameterTypes[0];
     }
@@ -4271,7 +4271,7 @@ export class FunctionType extends Type {
             id += "gas";
         if (this.valueSet)
             id += "value";
-        if (this._bound)
+        if (this.bound)
             id += "bound_to" + identifierList(this.selfType);
         return id;
     }
@@ -4292,9 +4292,9 @@ export class FunctionType extends Type {
         //@todo this is ugly, but cannot be prevented right now
         if (this.gasSet !== other.gasSet || this.valueSet !== other.valueSet)
             return false;
-        if (this._bound !== other._bound)
+        if (this.bound !== other.bound)
             return false;
-        if (this._bound && !this.selfType.equals(other.selfType))
+        if (this.bound && !this.selfType.equals(other.selfType))
             return false;
         return true;
     }
@@ -4402,7 +4402,7 @@ export class FunctionType extends Type {
             size++;
         if (this.valueSet)
             size++;
-        if (this._bound)
+        if (this.bound)
             size += first(this._parameterTypes).sizeOnStack;
         return size;
     }
@@ -4521,8 +4521,8 @@ export class FunctionType extends Type {
     /// @param _selfType if the function is bound, this has to be supplied and is the type of the
     /// expression the function is called on.
     public canTakeArguments(argumentTypes: Type[], selfType?: Type): boolean {
-        Debug.assert(!this._bound || !!selfType);
-        if (this._bound && !selfType.isImplicitlyConvertibleTo(this.selfType))
+        Debug.assert(!this.bound || !!selfType);
+        if (this.bound && !selfType.isImplicitlyConvertibleTo(this.selfType))
             return false;
         const paramTypes = this._parameterTypes;
         if (this.takesArbitraryParameters())
@@ -4633,7 +4633,7 @@ export class FunctionType extends Type {
             this._declaration,
             this.gasSet || setGas,
             this.valueSet || setValue,
-            this._bound
+            this.bound
         );
     }
 
