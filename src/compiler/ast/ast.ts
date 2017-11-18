@@ -480,6 +480,11 @@ export class Literal extends PrimaryExpression {
 
         return Math.abs(this.value.length - 42) <= 1;
     }
+
+    /// @returns true if it passes the address checksum test.
+    public passesAddressChecksum(): boolean {
+        return util.isValidChecksumAddress(this.value);
+    }
 }
 
 /**
