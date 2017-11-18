@@ -194,6 +194,11 @@ export function isCompareOp(op: TokenName): boolean {
     return TokenName.Equal <= op && op <= TokenName.GreaterThanOrEqual;
 }
 
+export function assignmentToBinaryOp(op: TokenName): TokenName {
+    Debug.assert(isAssignmentOp(op) && op !== TokenName.Assign);
+    return op + (TokenName.BitOr - TokenName.AssignBitOr);
+}
+
 export function isBitOp(op: TokenName): boolean {
     return (TokenName.BitOr <= op && op <= TokenName.BitAnd) || op === TokenName.BitNot;
 }
