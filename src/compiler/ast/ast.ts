@@ -2438,7 +2438,7 @@ export class IntegerType extends Type {
             return [];
     }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         if (this.isAddress())
             return "address";
         const prefix = this.isSigned() ? "int" : "uint";
@@ -2572,7 +2572,7 @@ export class FixedPointType extends Type {
     public get storageBytes(): number { return Math.floor(this.numBits / 8); }
     public isValueType(): boolean { return true; }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         const prefix = this.isSigned() ? "fixed" : "ufixed";
         return prefix + this.numBits + "x" + this.fractionalDigits;
     }
@@ -2664,7 +2664,7 @@ export class RationalNumberType extends Type {
     public canBeStored(): boolean { return false; }
     public canLiveOutsideStorage(): boolean { return false; }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         const [numerator, denominator] = this.value.toFraction();
         if (!this.isFractional()) {
             return "int_const " + numerator;
@@ -2790,7 +2790,7 @@ export class StringLiteralType extends Type {
     public canLiveOutsideStorage(): boolean { return false; }
     public get sizeOnStack(): number { return 0; }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         // FIXME: Return an error if this.value is not a valid UTF8 string.
         return "literal_string \"" + this.value + "\"";
     }
@@ -2880,7 +2880,7 @@ export class FixedBytesType extends Type {
     public get storageBytes(): number { return this.numBytes; }
     public isValueType(): boolean { return true; }
 
-    public toString(_short: boolean): string { return "bytes" + this.numBytes; }
+    public toString(_short?: boolean): string { return "bytes" + this.numBytes; }
 
     public nativeMembers(_contract: ContractDefinition): MemberMap {
         return [new Member("length", new IntegerType(8))];
@@ -2917,7 +2917,7 @@ export class BoolType extends Type {
     public get storageBytes(): number { return 1; }
     public isValueType(): boolean { return true; }
 
-    public toString(_short: boolean): string { return "bool"; }
+    public toString(_short?: boolean): string { return "bool"; }
     public literalValue(literal?: Literal): u256 {
         Debug.assert(!!literal);
         if (literal.token === TokenName.TrueLiteral)
@@ -3392,7 +3392,7 @@ export class ContractType extends Type {
     public get sizeOnStack(): number { return this._isSuper ? 0 : 1; }
     public isValueType(): boolean { return true; }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         return (this.contractDefinition.isLibrary() ? "library " : "contract ") +
             (this._isSuper ? "super " : "") + this.contractDefinition.name;
     }
@@ -3800,7 +3800,7 @@ export class EnumType extends Type {
     }
     public canLiveOutsideStorage(): boolean { return true; }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         return "enum " + this.enumDefinition.annotation.canonicalName;
     }
     public get canonicalName(): string {
@@ -4898,7 +4898,7 @@ export class ModuleType extends Type {
         return symbols;
     }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         return "module \"" + this.sourceUnit.annotation.path + "\"";
     }
 }
@@ -4971,7 +4971,7 @@ export class MagicType extends Type {
         }
     }
 
-    public toString(_short: boolean): string {
+    public toString(_short?: boolean): string {
         switch (this.kind) {
             case MagicKind.Block:
                 return "block";
@@ -5001,7 +5001,7 @@ export class InaccessibleDynamicType extends Type {
     public canLiveOutsideStorage(): boolean { return false; }
     public isValueType(): boolean { return true; }
     public get sizeOnStack(): number { return 1; }
-    public toString(_short: boolean): string { return "inaccessible dynamic type"; }
+    public toString(_short?: boolean): string { return "inaccessible dynamic type"; }
     public get decodingType(): Type { return new IntegerType(256); }
 }
 
