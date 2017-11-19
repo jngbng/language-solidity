@@ -19,7 +19,7 @@ import {
 import { ASTVisitor } from "../ast/astVisitor";
 import { Debug, findIndex, first, last, removeWhere } from "../core";
 import { DiagnosticReporter } from "../interface/diagnosticReporter";
-import { SecondarySourceLocation, SourceLocation } from "../types";
+import { SecondarySourceLocation, SourceLocation, Map as SymbolMap } from "../types";
 import { DeclarationContainer } from "./declarationContainer";
 import { ReferencesResolver } from "./referenceResolver";
 
@@ -284,7 +284,7 @@ export class NameAndTypeResolver {
     }
 
     /// Applies the effect of import directives.
-    public performImports(sourceUnit: SourceUnit, sourceUnits: Map<string, SourceUnit>): boolean {
+    public performImports(sourceUnit: SourceUnit, sourceUnits: SymbolMap<SourceUnit>): boolean {
         const target = this.scopes.get(sourceUnit);
         let error = false;
         for (const node of sourceUnit.nodes) {
