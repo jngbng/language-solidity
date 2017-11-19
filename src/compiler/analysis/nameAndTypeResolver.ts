@@ -8,16 +8,25 @@ import {
     FunctionDefinition,
     Identifier,
     ImportDirective,
-    MagicVariableDeclaration,
     ModifierDefinition,
     SourceUnit,
     StructDefinition,
     VariableDeclaration,
     VariableDeclarationStatement,
-    VariableScope
+    VariableScope,
+    isContractDefinition,
+    isDeclaration,
+    isEnumDefinition,
+    isEventDefinition,
+    isFunctionDefinition,
+    isImportDirective,
+    isMagicVariableDeclaration,
+    isModifierDefinition,
+    isStructDefinition,
+    isVariableDeclaration
 } from "../ast/ast";
 import { ASTVisitor } from "../ast/astVisitor";
-import { Debug, findIndex, first, last, removeWhere } from "../core";
+import { Debug, findIndex, first, last, removeWhere, tryCast } from "../core";
 import { DiagnosticReporter } from "../interface/diagnosticReporter";
 import { SecondarySourceLocation, SourceLocation, Map as SymbolMap } from "../types";
 import { DeclarationContainer } from "./declarationContainer";
@@ -68,11 +77,11 @@ class DeclarationRegistrationHelper extends ASTVisitor {
             return false;
         }
         else if (shadowedDeclaration) {
-            if (shadowedDeclaration instanceof MagicVariableDeclaration)
+            if (isMagicVariableDeclaration(shadowedDeclaration))
                 diagnosticReporter.warning(
                     "This declaration shadows a builtin symbol.", declaration.location);
             else {
-                const shadowedLocation = shadowedDeclaration.location;
+                const shadowedLocation = (shadowedDeclaration as Declaration).location;
                 diagnosticReporter.warning(
                     "This declaration shadows an existing declaration.",
                     declaration.location,
@@ -104,12 +113,12 @@ class DeclarationRegistrationHelper extends ASTVisitor {
         // Do not warn about shadowing for structs and enums because their members are
         // not accessible without prefixes. Also do not warn about event parameters
         // because they don't participate in any proper scope.
-        if (this.currentScope instanceof StructDefinition ||
-            this.currentScope instanceof EnumDefinition ||
-            this.currentScope instanceof EventDefinition)
+        if (isStructDefinition(this.currentScope) ||
+            isEnumDefinition(this.currentScope) ||
+            isEventDefinition(this.currentScope))
             warnAboutShadowing = false;
         // Do not warn about the constructor shadowing the contract.
-        if (declaration instanceof FunctionDefinition) {
+        if (isFunctionDefinition(declaration)) {
             if (declaration.isConstructor())
                 warnAboutShadowing = false;
         }
@@ -124,7 +133,7 @@ class DeclarationRegistrationHelper extends ASTVisitor {
     private get currentCanonicalName(): string {
         let ret: string = "";
         for (let scope = this.currentScope; !!scope; scope = this.scopes.get(scope).enclosingNode) {
-            if (scope instanceof Declaration) {
+            if (isDeclaration(scope)) {
                 if (ret !== "")
                     ret = "." + ret;
                 ret = scope.name + ret;
@@ -288,7 +297,7 @@ export class NameAndTypeResolver {
         const target = this.scopes.get(sourceUnit);
         let error = false;
         for (const node of sourceUnit.nodes) {
-            if (node instanceof ImportDirective) {
+            if (isImportDirective(node)) {
                 const path = node.annotation.absolutePath;
                 if (!sourceUnits.has(path)) {
                     this.diagnosticReporter.declarationError(
@@ -409,9 +418,9 @@ export class NameAndTypeResolver {
             Debug.assert(!!declaration);
             // the declaration is functionDefinition, eventDefinition or a VariableDeclaration while declarations > 1
             Debug.assert(
-                declaration instanceof FunctionDefinition ||
-                declaration instanceof EventDefinition ||
-                declaration instanceof VariableDeclaration,
+                isFunctionDefinition(declaration) ||
+                isEventDefinition(declaration) ||
+                isVariableDeclaration(declaration),
                 "Found overloading involving something not a function or a variable."
             );
 
@@ -444,18 +453,18 @@ export class NameAndTypeResolver {
             const declarations = this.nameFromCurrentScope(instructionName.toLowerCase());
             for (const declaration of declarations) {
                 Debug.assert(!!declaration);
-                if (declaration instanceof MagicVariableDeclaration)
+                if (isMagicVariableDeclaration(declaration))
                     continue; // Don't warn the user for what the user did not.
                 this.diagnosticReporter.warning(
                     "Variable is shadowed in inline assembly by an instruction of the same name",
-                    declaration.location);
+                    (declaration as Declaration).location);
             }
         }
     }
 
     /// Internal version of @a resolveNamesAndTypes (called from there) throws exceptions on fatal errors.
     private resolveNamesAndTypesInternal(node: ASTNode, resolveInsideCode = true): boolean {
-        if (node instanceof ContractDefinition) {
+        if (isContractDefinition(node)) {
             let success = true;
             this.currentScope = this.scopes.get(node.scope);
             Debug.assert(!!this.currentScope);
@@ -523,11 +532,11 @@ export class NameAndTypeResolver {
                         Debug.assert(!!conflictingDeclaration);
 
                         // Usual shadowing is not an error
-                        if (declaration instanceof VariableDeclaration && conflictingDeclaration instanceof VariableDeclaration)
+                        if (isVariableDeclaration(declaration) && isVariableDeclaration(conflictingDeclaration))
                             continue;
 
                         // Usual shadowing is not an error
-                        if (declaration instanceof ModifierDefinition && conflictingDeclaration instanceof ModifierDefinition)
+                        if (isModifierDefinition(declaration) && isModifierDefinition(conflictingDeclaration))
                             continue;
 
                         if (declaration.location.start < conflictingDeclaration.location.start) {
@@ -556,7 +565,7 @@ export class NameAndTypeResolver {
         const input: ContractDefinition[][] = [[]];
         for (const baseSpecifier of _contract.baseContracts) {
             const baseName = baseSpecifier.name;
-            const base = baseName.annotation.referencedDeclaration as ContractDefinition;
+            const base = tryCast(baseName.annotation.referencedDeclaration, isContractDefinition);
             if (!base)
                 this.diagnosticReporter.fatalTypeError("Contract expected.", baseName.location);
             // "unshift" has the effect that bases mentioned later can overwrite members of bases

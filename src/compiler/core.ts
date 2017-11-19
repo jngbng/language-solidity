@@ -311,6 +311,15 @@ export function isString(text: any): text is string {
     return typeof text === "string";
 }
 
+export function tryCast<TOut extends TIn, TIn = any>(value: TIn | undefined, test: (value: TIn) => value is TOut): TOut | undefined {
+    return value !== undefined && test(value) ? value : undefined;
+}
+
+export function cast<TOut extends TIn, TIn = any>(value: TIn | undefined, test: (value: TIn) => value is TOut): TOut {
+    if (value !== undefined && test(value)) return value;
+    Debug.fail(`Invalid cast. The supplied value did not pass the test '${Debug.getFunctionName(test)}'.`);
+}
+
 /** Do nothing and return false */
 export function returnFalse(): false { return false; }
 

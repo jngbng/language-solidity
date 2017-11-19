@@ -5,27 +5,17 @@ import {
     MultiMap,
     applyMixins,
     arrayIsEqualTo,
+    cast,
     contains,
     createMap,
     createMultiMap,
     first,
     firstOrUndefined,
     isString,
-    lastOrUndefined
+    lastOrUndefined,
+    tryCast
 } from "../core";
-import {
-    ElementaryTypeNameToken,
-    TokenName,
-    fromIdentifierOrKeyword,
-    isAssignmentOp,
-    isBinaryOp,
-    isBitOp,
-    isBooleanOp,
-    isCompareOp,
-    isElementaryTypeName,
-    isShiftOp,
-    isUnaryOp
-} from "../parsing/token";
+import { Token } from "../parsing/token";
 import {
     CancellationToken,
     CompilerOptions,
@@ -150,10 +140,14 @@ export class SourceUnit extends ASTNode {
     }
 }
 
+export function isSourceUnit(node: ASTNode): node is SourceUnit {
+    return node instanceof SourceUnit;
+}
+
 export class PragmaDirective extends ASTNode {
     constructor(
         location: SourceLocation,
-        public readonly tokens: ReadonlyArray<TokenName>,
+        public readonly tokens: ReadonlyArray<Token.TokenName>,
         public readonly literals: ReadonlyArray<string>
     ) {
         super(location);
@@ -163,6 +157,10 @@ export class PragmaDirective extends ASTNode {
         visitor.visitPragmaDirective(this);
         visitor.endVisitPragmaDirective(this);
     }
+}
+
+export function isPragmaDirective(node: ASTNode): node is PragmaDirective {
+    return node instanceof PragmaDirective;
 }
 
 /**
@@ -182,6 +180,10 @@ export abstract class Expression extends ASTNode {
     }
 }
 
+export function isExpression(node: ASTNode): node is Expression {
+    return node instanceof Expression;
+}
+
 /**
  * Primary expression, i.e. an expression that cannot be divided any further. Examples are literals
  * or variable references.
@@ -192,16 +194,20 @@ export abstract class PrimaryExpression extends Expression {
     }
 }
 
+export function isPrimaryExpression(node: ASTNode): node is PrimaryExpression {
+    return node instanceof PrimaryExpression;
+}
+
 /// Assignment, can also be a compound assignment.
 /// Examples: (a = 7 + 8) or (a *= 2)
 export class Assignment extends Expression {
     constructor(
         location: SourceLocation,
         public readonly leftHandSide: Expression,
-        public readonly assignmentOperator: TokenName,
+        public readonly assignmentOperator: Token.TokenName,
         public readonly rightHandSide: Expression) {
         super(location);
-        Debug.assert(isAssignmentOp(assignmentOperator));
+        Debug.assert(Token.isAssignmentOp(assignmentOperator));
     }
 
     public accept(visitor: ASTVisitor) {
@@ -211,6 +217,10 @@ export class Assignment extends Expression {
         }
         visitor.endVisitAssignment(this);
     }
+}
+
+export function isAssignment(node: ASTNode): node is Assignment {
+    return node instanceof Assignment;
 }
 
 export class Conditional extends Expression {
@@ -230,6 +240,10 @@ export class Conditional extends Expression {
         }
         visitor.endVisitConditional(this);
     }
+}
+
+export function isConditional(node: ASTNode): node is Conditional {
+    return node instanceof Conditional;
 }
 
 /**
@@ -252,6 +266,10 @@ export class IndexAccess extends Expression {
         }
         visitor.endVisitIndexAccess(this);
     }
+}
+
+export function isIndexAccess(node: ASTNode): node is IndexAccess {
+    return node instanceof IndexAccess;
 }
 
 /**
@@ -278,6 +296,10 @@ export class MemberAccess extends Expression {
     }
 }
 
+export function isMemberAccess(node: ASTNode): node is MemberAccess {
+    return node instanceof MemberAccess;
+}
+
 /**
  * Expression that creates a new contract or memory-array,
  * e.g. the "new SomeContract" part in "new SomeContract(1, 2)".
@@ -295,6 +317,10 @@ export class NewExpression extends Expression {
             this.typeName.accept(visitor);
         visitor.endVisitNewExpression(this);
     }
+}
+
+export function isNewExpression(node: ASTNode): node is NewExpression {
+    return node instanceof NewExpression;
 }
 
 /**
@@ -325,6 +351,10 @@ export class FunctionCall extends Expression {
     }
 }
 
+export function isFunctionCall(node: ASTNode): node is FunctionCall {
+    return node instanceof FunctionCall;
+}
+
 /**
  * Operation involving a unary operator, pre- or postfix.
  * Examples: ++i, delete x or !true
@@ -332,11 +362,11 @@ export class FunctionCall extends Expression {
 export class UnaryOperation extends Expression {
     constructor(
         location: SourceLocation,
-        public readonly operator: TokenName,
+        public readonly operator: Token.TokenName,
         public readonly subExpression: Expression,
         private isPrefix: boolean) {
         super(location);
-        Debug.assert(isUnaryOp(operator));
+        Debug.assert(Token.isUnaryOp(operator));
     }
 
     public isPrefixOperation(): boolean {
@@ -350,6 +380,10 @@ export class UnaryOperation extends Expression {
     }
 }
 
+export function isUnaryOperation(node: ASTNode): node is UnaryOperation {
+    return node instanceof UnaryOperation;
+}
+
 /**
  * Operation involving a binary operator.
  * Examples: 1 + 2, true && false or 1 <= 4
@@ -358,10 +392,10 @@ export class BinaryOperation extends Expression {
     constructor(
         location: SourceLocation,
         public readonly leftExpression: Expression,
-        public readonly operator: TokenName,
+        public readonly operator: Token.TokenName,
         public readonly rightExpression: Expression) {
         super(location);
-        Debug.assert(isBinaryOp(operator) || isCompareOp(operator));
+        Debug.assert(Token.isBinaryOp(operator) || Token.isCompareOp(operator));
     }
 
     public get annotation(): BinaryOperationAnnotation {
@@ -377,6 +411,10 @@ export class BinaryOperation extends Expression {
         }
         visitor.endVisitBinaryOperation(this);
     }
+}
+
+export function isBinaryOperation(node: ASTNode): node is BinaryOperation {
+    return node instanceof BinaryOperation;
 }
 
 /**
@@ -410,6 +448,10 @@ export class TupleExpression extends Expression {
     }
 }
 
+export function isTupleExpression(node: ASTNode): node is TupleExpression {
+    return node instanceof TupleExpression;
+}
+
 /**
  * An identifier, i.e. a reference to a declaration by name like a variable or function.
  */
@@ -432,18 +474,22 @@ export class Identifier extends PrimaryExpression {
     }
 }
 
+export function isIdentifier(node: ASTNode): node is Identifier {
+    return node instanceof Identifier;
+}
+
 export const enum SubDenomination {
-    None = TokenName.Illegal,
-    Wei = TokenName.SubWei,
-    Szabo = TokenName.SubSzabo,
-    Finney = TokenName.SubFinney,
-    Ether = TokenName.SubEther,
-    Second = TokenName.SubSecond,
-    Minute = TokenName.SubMinute,
-    Hour = TokenName.SubHour,
-    Day = TokenName.SubDay,
-    Week = TokenName.SubWeek,
-    Year = TokenName.SubYear
+    None = Token.TokenName.Illegal,
+    Wei = Token.TokenName.SubWei,
+    Szabo = Token.TokenName.SubSzabo,
+    Finney = Token.TokenName.SubFinney,
+    Ether = Token.TokenName.SubEther,
+    Second = Token.TokenName.SubSecond,
+    Minute = Token.TokenName.SubMinute,
+    Hour = Token.TokenName.SubHour,
+    Day = Token.TokenName.SubDay,
+    Week = Token.TokenName.SubWeek,
+    Year = Token.TokenName.SubYear
 };
 
 /**
@@ -452,7 +498,7 @@ export const enum SubDenomination {
 export class Literal extends PrimaryExpression {
     constructor(
         location: SourceLocation,
-        public readonly token: TokenName,
+        public readonly token: Token.TokenName,
         public readonly value: string,
         public readonly subDenomination = SubDenomination.None) {
         super(location);
@@ -465,7 +511,7 @@ export class Literal extends PrimaryExpression {
 
     /// @returns true if this is a number with a hex prefix.
     public isHexNumber(): boolean {
-        if (this.token !== TokenName.Number)
+        if (this.token !== Token.TokenName.Number)
             return false;
         return this.value.startsWith("0x");
     }
@@ -487,6 +533,10 @@ export class Literal extends PrimaryExpression {
     }
 }
 
+export function isLiteral(node: ASTNode): node is Literal {
+    return node instanceof Literal;
+}
+
 /**
  * An elementary type name expression is used in expressions like "a = uint32(2)" to change the
  * type of an expression explicitly. Here, "uint32" is the elementary type name expression and
@@ -495,7 +545,7 @@ export class Literal extends PrimaryExpression {
 export class ElementaryTypeNameExpression extends PrimaryExpression {
     constructor(
         location: SourceLocation,
-        public readonly typeName: ElementaryTypeNameToken
+        public readonly typeName: Token.ElementaryTypeNameToken
     ) {
         super(location);
     }
@@ -504,6 +554,10 @@ export class ElementaryTypeNameExpression extends PrimaryExpression {
         visitor.visitElementaryTypeNameExpression(this);
         visitor.endVisitElementaryTypeNameExpression(this);
     }
+}
+
+export function isElementaryTypeNameExpression(node: ASTNode): node is ElementaryTypeNameExpression {
+    return node instanceof ElementaryTypeNameExpression;
 }
 
 /// Visibility ordered from restricted to unrestricted.
@@ -558,7 +612,7 @@ export abstract class Declaration extends ASTNode {
     public get sourceUnit(): SourceUnit {
         Debug.assert(!!this._scope);
         let scope = this._scope;
-        while (scope instanceof Declaration && scope._scope instanceof Declaration)
+        while (isDeclaration(scope) && isDeclaration(scope._scope))
             scope = scope._scope;
         return scope as SourceUnit;
     }
@@ -591,6 +645,10 @@ export abstract class Declaration extends ASTNode {
     }
 }
 
+export function isDeclaration(node: ASTNode): node is Declaration {
+    return node instanceof Declaration;
+}
+
 /**
  * Base class for all nodes that define function-like objects, i.e. FunctionDefinition,
  * EventDefinition and ModifierDefinition.
@@ -616,6 +674,9 @@ export abstract class CallableDeclaration extends Declaration implements Variabl
 }
 applyMixins(CallableDeclaration, [VariableScope]);
 
+export function isCallableDeclaration(node: ASTNode): node is CallableDeclaration {
+    return node instanceof CallableDeclaration;
+}
 
 export class FunctionDefinition extends CallableDeclaration implements Documented, ImplementationOptional {
     constructor(
@@ -706,6 +767,10 @@ export class FunctionDefinition extends CallableDeclaration implements Documente
 }
 applyMixins(FunctionDefinition, [Documented, ImplementationOptional]);
 
+export function isFunctionDefinition(node: ASTNode): node is FunctionDefinition {
+    return node instanceof FunctionDefinition;
+}
+
 export const enum Location { Default, Storage, Memory }
 
 /**
@@ -774,13 +839,13 @@ export class VariableDeclaration extends Declaration {
     }
 
     public isLocalVariable(): boolean {
-        return !!(this.scope as CallableDeclaration);
+        return isCallableDeclaration(this.scope);
     }
 
     /// @returns true if this variable is a parameter or return parameter of a function.
     public isCallableParameter(): boolean {
-        const callable = this.scope as CallableDeclaration;
-        if (!callable)
+        const callable = this.scope;
+        if (!isCallableDeclaration(callable))
             return false;
         for (const variable of callable.parameters) {
             if (variable === this)
@@ -797,8 +862,8 @@ export class VariableDeclaration extends Declaration {
 
     /// @returns true if this variable is a return parameter of a function.
     public isReturnParameter(): boolean {
-        const callable = this.scope as CallableDeclaration;
-        if (!callable)
+        const callable = this.scope;
+        if (!isCallableDeclaration(callable))
             return false;
         if (callable.returnParameterList) {
             for (const variable of callable.returnParameterList.parameters) {
@@ -816,8 +881,8 @@ export class VariableDeclaration extends Declaration {
 
     /// @returns true if this variable is a parameter (not return parameter) of an external function.
     public isExternalCallableParameter(): boolean {
-        const callable = this.scope as CallableDeclaration;
-        if (!callable || callable.visibility !== Visibility.External)
+        const callable = this.scope;
+        if (!isCallableDeclaration(callable) || callable.visibility !== Visibility.External)
             return false;
         for (const variable of callable.parameters) {
             if (variable === this)
@@ -829,8 +894,8 @@ export class VariableDeclaration extends Declaration {
     /// @returns true if the type of the variable does not need to be specified, i.e. it is declared
     /// in the body of a function or modifier.
     public canHaveAutoType(): boolean {
-        const callable = this.scope as CallableDeclaration;
-        return (!!callable && !this.isCallableParameter());
+        const callable = this.scope;
+        return isCallableDeclaration(callable) && !this.isCallableParameter();
     }
 
     public isStateVariable(): boolean {
@@ -846,6 +911,10 @@ export class VariableDeclaration extends Declaration {
     protected get defaultVisibility(): Visibility {
         return Visibility.Internal;
     }
+}
+
+export function isVariableDeclaration(node: ASTNode): node is VariableDeclaration {
+    return node instanceof VariableDeclaration;
 }
 
 /**
@@ -868,6 +937,10 @@ export class ModifierInvocation extends ASTNode {
     }
 }
 
+export function isModifierInvocation(node: ASTNode): node is ModifierInvocation {
+    return node instanceof ModifierInvocation;
+}
+
 /**
  * Parameter list, used as function parameter list and return list.
  * None of the parameters is allowed to contain mappings (not even recursively
@@ -888,6 +961,10 @@ export class ParameterList extends ASTNode {
     }
 }
 
+export function isParameterList(node: ASTNode): node is ParameterList {
+    return node instanceof ParameterList;
+}
+
 export class InheritanceSpecifier extends ASTNode {
     constructor(
         location: SourceLocation,
@@ -903,6 +980,10 @@ export class InheritanceSpecifier extends ASTNode {
         }
         visitor.endVisitInheritanceSpecifier(this);
     }
+}
+
+export function isInheritanceSpecifier(node: ASTNode): node is InheritanceSpecifier {
+    return node instanceof InheritanceSpecifier;
 }
 
 /**
@@ -927,6 +1008,10 @@ export abstract class Statement extends ASTNode implements Documented {
 }
 applyMixins(Statement, [Documented]);
 
+export function isStatement(node: ASTNode): node is Statement {
+    return node instanceof Statement;
+}
+
 /**
  * Brace-enclosed block containing zero or more statements.
  */
@@ -945,6 +1030,10 @@ export class Block extends Statement {
     }
 }
 
+export function isBlock(node: ASTNode): node is Block {
+    return node instanceof Block;
+}
+
 /**
  * Special placeholder statement denoted by "_" used in function modifiers. This is replaced by
  * the original function when the modifier is applied.
@@ -960,6 +1049,10 @@ export class PlaceholderStatement extends Statement {
         visitor.visitPlaceholderStatement(this);
         visitor.endVisitPlaceholderStatement(this);
     }
+}
+
+export function isPlaceholderStatement(node: ASTNode): node is PlaceholderStatement {
+    return node instanceof PlaceholderStatement;
 }
 
 /**
@@ -987,6 +1080,10 @@ export class IfStatement extends Statement {
     }
 }
 
+export function isIfStatement(node: ASTNode): node is IfStatement {
+    return node instanceof IfStatement;
+}
+
 /**
  * Statement in which a break statement is legal (abstract class).
  */
@@ -996,6 +1093,10 @@ export abstract class BreakableStatement extends Statement {
         docString: string) {
         super(location, docString);
     }
+}
+
+export function isBreakableStatement(node: ASTNode): node is BreakableStatement {
+    return node instanceof BreakableStatement;
 }
 
 export class WhileStatement extends BreakableStatement {
@@ -1020,6 +1121,10 @@ export class WhileStatement extends BreakableStatement {
     public isDoWhile(): boolean {
         return this._isDoWhile;
     }
+}
+
+export function isWhileStatement(node: ASTNode): node is WhileStatement {
+    return node instanceof WhileStatement;
 }
 
 /**
@@ -1050,6 +1155,10 @@ export class ForStatement extends BreakableStatement {
     }
 }
 
+export function isForStatement(node: ASTNode): node is ForStatement {
+    return node instanceof ForStatement;
+}
+
 export class Continue extends Statement {
     constructor(location: SourceLocation, docString: string) {
         super(location, docString);
@@ -1061,6 +1170,10 @@ export class Continue extends Statement {
     }
 }
 
+export function isContinue(node: ASTNode): node is Continue {
+    return node instanceof Continue;
+}
+
 export class Break extends Statement {
     constructor(location: SourceLocation, docString: string) {
         super(location, docString);
@@ -1070,6 +1183,10 @@ export class Break extends Statement {
         visitor.visitBreak(this);
         visitor.endVisitBreak(this);
     }
+}
+
+export function isBreak(node: ASTNode): node is Break {
+    return node instanceof Break;
 }
 
 export class Return extends Statement {
@@ -1095,6 +1212,10 @@ export class Return extends Statement {
     }
 }
 
+export function isReturn(node: ASTNode): node is Return {
+    return node instanceof Return;
+}
+
 /**
  * @brief The Throw statement to throw that triggers a solidity exception(jump to ErrorTag)
  */
@@ -1107,6 +1228,10 @@ export class Throw extends Statement {
         visitor.visitThrow(this);
         visitor.endVisitThrow(this);
     }
+}
+
+export function isThrow(node: ASTNode): node is Throw {
+    return node instanceof Throw;
 }
 
 /**
@@ -1146,6 +1271,10 @@ export class VariableDeclarationStatement extends Statement {
     }
 }
 
+export function isVariableDeclarationStatement(node: ASTNode): node is VariableDeclarationStatement {
+    return node instanceof VariableDeclarationStatement;
+}
+
 /**
  * A statement that contains only an expression (i.e. an assignment, function call, ...).
  */
@@ -1164,6 +1293,10 @@ export class ExpressionStatement extends Statement {
         }
         visitor.endVisitExpressionStatement(this);
     }
+}
+
+export function isExpressionStatement(node: ASTNode): node is ExpressionStatement {
+    return node instanceof ExpressionStatement;
 }
 
 export const enum ContractKind { Interface, Contract, Library }
@@ -1346,6 +1479,10 @@ export class ContractDefinition extends Declaration implements Documented {
 }
 applyMixins(ContractDefinition, [Documented]);
 
+export function isContractDefinition(node: ASTNode): node is ContractDefinition {
+    return node instanceof ContractDefinition;
+}
+
 /**
  * Import directive for referencing other files / source objects.
  * Example: import "abc.sol" // imports all symbols of "abc.sol" into current scope
@@ -1383,6 +1520,10 @@ export class ImportDirective extends Declaration {
         visitor.visitImportDirective(this);
         visitor.endVisitImportDirective(this);
     }
+}
+
+export function isImportDirective(node: ASTNode): node is ImportDirective {
+    return node instanceof ImportDirective;
 }
 
 /**
@@ -1427,6 +1568,10 @@ export class EventDefinition extends CallableDeclaration implements Documented {
 }
 applyMixins(EventDefinition, [Documented]);
 
+export function isEventDefinition(node: ASTNode): node is EventDefinition {
+    return node instanceof EventDefinition;
+}
+
 /**
  * Pseudo AST node that is used as declaration for "this", "msg", "tx", "block" and the global
  * functions when such an identifier is encountered. Will never have a valid location in the source code.
@@ -1438,6 +1583,10 @@ export class MagicVariableDeclaration extends Declaration {
     public accept(_visitor: ASTVisitor) {
         Debug.assert(false, "MagicVariableDeclaration used inside real AST.");
     }
+}
+
+export function isMagicVariableDeclaration(node: ASTNode): node is MagicVariableDeclaration {
+    return node instanceof MagicVariableDeclaration;
 }
 
 /**
@@ -1474,6 +1623,10 @@ export class ModifierDefinition extends CallableDeclaration implements Documente
     }
 }
 
+export function isModifierDefinition(node: ASTNode): node is ModifierDefinition {
+    return node instanceof ModifierDefinition;
+}
+
 /**
  * `using LibraryName for uint` will attach all functions from the library LibraryName
  * to `uint` if the first parameter matches the type. `using LibraryName for *` attaches
@@ -1498,6 +1651,10 @@ export class UsingForDirective extends ASTNode {
     }
 }
 
+export function isUsingForDirective(node: ASTNode): node is UsingForDirective {
+    return node instanceof UsingForDirective;
+}
+
 export class StructDefinition extends Declaration {
     constructor(
         location: SourceLocation,
@@ -1520,6 +1677,10 @@ export class StructDefinition extends Declaration {
         }
         visitor.endVisitStructDefinition(this);
     }
+}
+
+export function isStructDefinition(node: ASTNode): node is StructDefinition {
+    return node instanceof StructDefinition;
 }
 
 export class EnumDefinition extends Declaration {
@@ -1549,6 +1710,10 @@ export class EnumDefinition extends Declaration {
     }
 }
 
+export function isEnumDefinition(node: ASTNode): node is EnumDefinition {
+    return node instanceof EnumDefinition;
+}
+
 /**
  * Declaration of an Enum Value
  */
@@ -1563,10 +1728,16 @@ export class EnumValue extends Declaration {
     }
 
     public get type(): Type {
-        const parentDef = this.scope as EnumDefinition;
-        Debug.assert(!!parentDef, "Enclosing Scope of EnumValue was not set");
-        return new EnumType(parentDef);
+        const parentDef = this.scope;
+        if (isEnumDefinition(parentDef))
+            return new EnumType(parentDef);
+        else
+            Debug.assert(false, "Enclosing Scope of EnumValue was not set");
     }
+}
+
+export function isEnumValue(node: ASTNode): node is EnumValue {
+    return node instanceof EnumValue;
 }
 
 /**
@@ -1584,6 +1755,10 @@ export abstract class TypeName extends ASTNode {
     }
 }
 
+export function isTypeName(node: ASTNode): node is TypeName {
+    return node instanceof TypeName;
+}
+
 /**
  * Any pre-defined type name represented by a single keyword, i.e. it excludes mappings,
  * contracts, functions, etc.
@@ -1591,7 +1766,7 @@ export abstract class TypeName extends ASTNode {
 export class ElementaryTypeName extends TypeName {
     constructor(
         location: SourceLocation,
-        public readonly typeName: ElementaryTypeNameToken
+        public readonly typeName: Token.ElementaryTypeNameToken
     ) {
         super(location);
     }
@@ -1600,6 +1775,10 @@ export class ElementaryTypeName extends TypeName {
         visitor.visitElementaryTypeName(this);
         visitor.endVisitElementaryTypeName(this);
     }
+}
+
+export function isElementaryTypeName(node: ASTNode): node is ElementaryTypeName {
+    return node instanceof ElementaryTypeName;
 }
 
 /**
@@ -1624,6 +1803,10 @@ export class ArrayTypeName extends TypeName {
     }
 }
 
+export function isArrayTypeName(node: ASTNode): node is ArrayTypeName {
+    return node instanceof ArrayTypeName;
+}
+
 /**
  * A mapping type. Its source form is "mapping('keyType' => 'valueType')"
  */
@@ -1642,6 +1825,10 @@ export class Mapping extends TypeName {
         }
         visitor.endVisitMapping(this);
     }
+}
+
+export function isMapping(node: ASTNode): node is Mapping {
+    return node instanceof Mapping;
 }
 
 /**
@@ -1673,6 +1860,10 @@ export class FunctionTypeName extends TypeName {
     public get returnParameterTypes(): ReadonlyArray<VariableDeclaration> { return this.returnParameterTypeList.parameters; }
 }
 
+export function isFunctionTypeName(node: ASTNode): node is FunctionTypeName {
+    return node instanceof FunctionTypeName;
+}
+
 /**
  * Name referring to a user-defined type (i.e. a struct, contract, etc.).
  */
@@ -1694,6 +1885,10 @@ export class UserDefinedTypeName extends TypeName {
         visitor.visitUserDefinedTypeName(this);
         visitor.endVisitUserDefinedTypeName(this);
     }
+}
+
+export function isUserDefinedTypeName(node: ASTNode): node is UserDefinedTypeName {
+    return node instanceof UserDefinedTypeName;
 }
 
 export interface ScriptReferenceHost {
@@ -2031,10 +2226,10 @@ export abstract class Type {
 
     public static forLiteral(literal: Literal) {
         switch (literal.token) {
-            case TokenName.TrueLiteral:
-            case TokenName.FalseLiteral:
+            case Token.TokenName.TrueLiteral:
+            case Token.TokenName.FalseLiteral:
                 return new BoolType();
-            case TokenName.Number:
+            case Token.TokenName.Number:
                 {
                     const validLiteral = RationalNumberType.isValidLiteral(literal);
                     if (validLiteral)
@@ -2042,22 +2237,22 @@ export abstract class Type {
                     else
                         return undefined;
                 }
-            case TokenName.StringLiteral:
+            case Token.TokenName.StringLiteral:
                 return new StringLiteralType(literal);
             default:
                 return undefined;
         }
     }
 
-    public static fromElementaryTypeName(name: string | ElementaryTypeNameToken): Type {
+    public static fromElementaryTypeName(name: string | Token.ElementaryTypeNameToken): Type {
         if (isString(name)) {
             const characterCodes = stringToCharCodes(name);
-            const { token, m, n } = fromIdentifierOrKeyword(characterCodes);
-            return Type.fromElementaryTypeName(new ElementaryTypeNameToken(token, m, n));
+            const { token, m, n } = Token.fromIdentifierOrKeyword(characterCodes);
+            return Type.fromElementaryTypeName(new Token.ElementaryTypeNameToken(token, m, n));
         }
 
-        const type = name as ElementaryTypeNameToken;
-        Debug.assert(isElementaryTypeName(type.token),
+        const type = name as Token.ElementaryTypeNameToken;
+        Debug.assert(Token.isElementaryTypeName(type.token),
             "Expected an elementary type name but got " + type.toString()
         );
 
@@ -2066,33 +2261,33 @@ export abstract class Type {
         const n = type.secondNumber;
 
         switch (token) {
-            case TokenName.IntM:
+            case Token.TokenName.IntM:
                 return new IntegerType(m, IntegerTypeModifier.Signed);
-            case TokenName.UIntM:
+            case Token.TokenName.UIntM:
                 return new IntegerType(m, IntegerTypeModifier.Unsigned);
-            case TokenName.BytesM:
+            case Token.TokenName.BytesM:
                 return new FixedBytesType(m);
-            case TokenName.FixedMxN:
+            case Token.TokenName.FixedMxN:
                 return new FixedPointType(m, n, FixedPointTypeModifier.Signed);
-            case TokenName.UFixedMxN:
+            case Token.TokenName.UFixedMxN:
                 return new FixedPointType(m, n, FixedPointTypeModifier.Unsigned);
-            case TokenName.Int:
+            case Token.TokenName.Int:
                 return new IntegerType(256, IntegerTypeModifier.Signed);
-            case TokenName.UInt:
+            case Token.TokenName.UInt:
                 return new IntegerType(256, IntegerTypeModifier.Unsigned);
-            case TokenName.Fixed:
+            case Token.TokenName.Fixed:
                 return new FixedPointType(128, 19, FixedPointTypeModifier.Signed);
-            case TokenName.UFixed:
+            case Token.TokenName.UFixed:
                 return new FixedPointType(128, 19, FixedPointTypeModifier.Unsigned);
-            case TokenName.Byte:
+            case Token.TokenName.Byte:
                 return new FixedBytesType(1);
-            case TokenName.Address:
+            case Token.TokenName.Address:
                 return new IntegerType(160, IntegerTypeModifier.Address);
-            case TokenName.Bool:
+            case Token.TokenName.Bool:
                 return new BoolType();
-            case TokenName.Bytes:
+            case Token.TokenName.Bytes:
                 return ArrayType.newBytesOrString(DataLocation.Storage);
-            case TokenName.String:
+            case Token.TokenName.String:
                 return ArrayType.newBytesOrString(DataLocation.Storage, true);
             //no types found
             default:
@@ -2121,13 +2316,13 @@ export abstract class Type {
     /// @returns the resulting type of applying the given unary operator or an empty pointer if
     /// this is not possible.
     /// The default implementation does not allow any unary operator.
-    public unaryOperatorResult(_operator: TokenName): Type | undefined { return undefined; }
+    public unaryOperatorResult(_operator: Token.TokenName): Type | undefined { return undefined; }
 
     /// @returns the resulting type of applying the given binary operator or an empty pointer if
     /// this is not possible.
     /// The default implementation allows comparison operators if a common type exists
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
-        return isCompareOp(operator) ? Type.commonType(this, other) : undefined;
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
+        return Token.isCompareOp(operator) ? Type.commonType(this, other) : undefined;
     }
 
     public equals(other: Type): boolean { return this.category === other.category; }
@@ -2260,7 +2455,7 @@ function boundFunctions(_type: Type, scope: ContractDefinition): MemberMap {
                 !type.equals(ReferenceType.copyForLocationIfReference(DataLocation.Storage, ufd.typeName.annotation.type)))
                 continue;
 
-            const library = ufd.libraryName.annotation.referencedDeclaration as ContractDefinition;
+            const library = cast(ufd.libraryName.annotation.referencedDeclaration, isContractDefinition);
             for (const funDecl of library.definedFunctions) {
                 if (!funDecl.isVisibleInDerivedContracts() || seenFunctions.has(funDecl))
                     continue;
@@ -2309,13 +2504,13 @@ export class IntegerType extends Type {
     public equals(other: Type): boolean {
         if (other.category !== this.category)
             return false;
-        return other instanceof IntegerType &&
+        return isIntegerType(other) &&
             other.bits === this.bits &&
             other.modifier === this.modifier;
     }
 
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (convertTo instanceof IntegerType) {
+        if (isIntegerType(convertTo)) {
             if (convertTo.bits < this.bits)
                 return false;
             if (this.isAddress())
@@ -2325,7 +2520,7 @@ export class IntegerType extends Type {
             else
                 return !convertTo.isSigned() || convertTo.bits > this.bits;
         }
-        else if (convertTo instanceof FixedPointType) {
+        else if (isFixedPointType(convertTo)) {
             if (this.isAddress())
                 return false;
             else
@@ -2343,29 +2538,29 @@ export class IntegerType extends Type {
             convertTo.category === TypeCategory.FixedPoint;
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
         // "delete" is ok for all integer types
-        if (operator === TokenName.Delete)
+        if (operator === Token.TokenName.Delete)
             return new TupleType();
         // no further unary operators for addresses
         else if (this.isAddress())
             return undefined;
         // for non-address integers, we allow +, -, ++ and --
-        else if (operator === TokenName.Add || operator === TokenName.Sub ||
-            operator === TokenName.Inc || operator === TokenName.Dec ||
-            operator === TokenName.BitNot)
+        else if (operator === Token.TokenName.Add || operator === Token.TokenName.Sub ||
+            operator === Token.TokenName.Inc || operator === Token.TokenName.Dec ||
+            operator === Token.TokenName.BitNot)
             return this;
         else
             return undefined;
     }
 
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
         if (other.category !== TypeCategory.RationalNumber &&
             other.category !== TypeCategory.FixedPoint &&
             other.category !== this.category)
             return undefined;
 
-        if (isShiftOp(operator)) {
+        if (Token.isShiftOp(operator)) {
             // Shifts are not symmetric with respect to the type
             if (this.isAddress())
                 return undefined;
@@ -2380,20 +2575,20 @@ export class IntegerType extends Type {
             return undefined;
 
         // All integer types can be compared
-        if (isCompareOp(operator))
+        if (Token.isCompareOp(operator))
             return commonType;
-        if (isBooleanOp(operator))
+        if (Token.isBooleanOp(operator))
             return undefined;
-        if (commonType instanceof IntegerType) {
+        if (isIntegerType(commonType)) {
             // Nothing else can be done with addresses
             if (commonType.isAddress())
                 return undefined;
             // Signed EXP is not allowed
-            if (TokenName.Exp === operator && commonType.isSigned())
+            if (Token.TokenName.Exp === operator && commonType.isSigned())
                 return undefined;
         }
-        else if (commonType instanceof FixedPointType) {
-            if (TokenName.Exp === operator)
+        else if (isFixedPointType(commonType)) {
+            if (Token.TokenName.Exp === operator)
                 return undefined;
         }
         return commonType;
@@ -2482,6 +2677,10 @@ export class IntegerType extends Type {
     }
 }
 
+export function isIntegerType(t: Type): t is IntegerType {
+    return t.category === TypeCategory.Integer;
+}
+
 export const enum FixedPointTypeModifier {
     Unsigned, Signed
 }
@@ -2511,14 +2710,14 @@ export class FixedPointType extends Type {
     public equals(other: Type): boolean {
         if (other.category !== this.category)
             return false;
-        return other instanceof FixedPointType &&
+        return isFixedPointType(other) &&
             other.numBits === this.numBits &&
             other.fractionalDigits === this.fractionalDigits &&
             other.modifier === this.modifier;
     }
 
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (convertTo instanceof FixedPointType) {
+        if (isFixedPointType(convertTo)) {
             if (convertTo.numBits < this.numBits || convertTo.fractionalDigits < this.fractionalDigits)
                 return false;
             else
@@ -2533,15 +2732,15 @@ export class FixedPointType extends Type {
             convertTo.category === TypeCategory.FixedBytes;
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
         switch (operator) {
-            case TokenName.Delete:
+            case Token.TokenName.Delete:
                 // "delete" is ok for all fixed types
                 return new TupleType();
-            case TokenName.Add:
-            case TokenName.Sub:
-            case TokenName.Inc:
-            case TokenName.Dec:
+            case Token.TokenName.Add:
+            case Token.TokenName.Sub:
+            case Token.TokenName.Inc:
+            case Token.TokenName.Dec:
                 // for fixed, we allow +, -, ++ and --
                 return this;
             default:
@@ -2549,7 +2748,7 @@ export class FixedPointType extends Type {
         }
     }
 
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
         if (
             other.category !== TypeCategory.RationalNumber &&
             other.category !== this.category &&
@@ -2561,16 +2760,16 @@ export class FixedPointType extends Type {
             return undefined;
 
         // All fixed types can be compared
-        if (isCompareOp(operator))
+        if (Token.isCompareOp(operator))
             return commonType;
-        if (isBitOp(operator) || isBooleanOp(operator))
+        if (Token.isBitOp(operator) || Token.isBooleanOp(operator))
             return undefined;
 
-        if (commonType instanceof FixedPointType) {
-            if (TokenName.Exp === operator)
+        if (isFixedPointType(commonType)) {
+            if (Token.TokenName.Exp === operator)
                 return undefined;
         }
-        else if (commonType instanceof IntegerType) {
+        else if (isIntegerType(commonType)) {
             if (commonType.isAddress())
                 return undefined;
         }
@@ -2610,6 +2809,10 @@ export class FixedPointType extends Type {
     }
 }
 
+export function isFixedPointType(t: Type): t is FixedPointType {
+    return t.category === TypeCategory.FixedPoint;
+}
+
 /**
  * Integer and fixed point constants either literals or computed.
  * Example expressions: 2, 3.14, 2+10.2, ~10.
@@ -2635,29 +2838,29 @@ export class RationalNumberType extends Type {
         return mobType && mobType.isExplicitlyConvertibleTo(convertTo);
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
         let value = new BN(0);
         switch (operator) {
-            case TokenName.BitNot:
+            case Token.TokenName.BitNot:
                 if (this.isFractional())
                     return undefined;
                 const [numerator,] = this.value.toFraction();
                 value = new BN(~(new BN(numerator).toNumber()));
                 break;
-            case TokenName.Add:
+            case Token.TokenName.Add:
                 value = value.add(this.value);
                 break;
-            case TokenName.Sub:
+            case Token.TokenName.Sub:
                 value = value.sub(this.value);
                 break;
-            case TokenName.After:
+            case Token.TokenName.After:
                 return this;
             default:
                 return undefined;
         }
         return new RationalNumberType(value);
     }
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined {
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined {
         throw new Error("Not implemented");
     }
 
@@ -2667,7 +2870,7 @@ export class RationalNumberType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof RationalNumberType && this.value.equals(other.value);
+        return isRationalNumberType(other) && this.value.equals(other.value);
     }
 
     public canBeStored(): boolean { return false; }
@@ -2758,6 +2961,10 @@ export class RationalNumberType extends Type {
     public isNegative(): boolean { return this.value.isNegative(); }
 }
 
+export function isRationalNumberType(t: Type): t is RationalNumberType {
+    return t.category === TypeCategory.RationalNumber;
+}
+
 /**
  * Literal string, can be converted to bytes, bytesX or string.
  */
@@ -2771,18 +2978,18 @@ export class StringLiteralType extends Type {
         this.value = literal.value;
     }
 
-    public isImplicitlyConvertibleTo(_convertTo: Type): boolean {
-        if (_convertTo instanceof FixedBytesType)
-            return _convertTo.numBytes >= this.value.length;
-        else if (_convertTo instanceof ArrayType)
-            return _convertTo.isByteArray() &&
-                !(_convertTo.dataStoredIn(DataLocation.Storage) && _convertTo.isPointer()) &&
-                !(_convertTo.isString() && !this.isValidUTF8());
+    public isImplicitlyConvertibleTo(convertTo: Type): boolean {
+        if (isFixedBytesType(convertTo))
+            return convertTo.numBytes >= this.value.length;
+        else if (isArrayType(convertTo))
+            return convertTo.isByteArray() &&
+                !(convertTo.dataStoredIn(DataLocation.Storage) && convertTo.isPointer()) &&
+                !(convertTo.isString() && !this.isValidUTF8());
         else
             return false;
     }
 
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
 
     public get identifier(): string {
         // Since we have to return a valid identifier and the string itself may contain
@@ -2791,8 +2998,7 @@ export class StringLiteralType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof StringLiteralType &&
-            this.value === other.value;
+        return isStringLiteralType(other) && this.value === other.value;
     }
 
     public canBeStored(): boolean { return false; }
@@ -2812,6 +3018,10 @@ export class StringLiteralType extends Type {
         // FIXME: Check if this.value is a valid UTF8 string.
         return true;
     }
+}
+
+export function isStringLiteralType(t: Type): t is StringLiteralType {
+    return t.category === TypeCategory.StringLiteral;
 }
 
 /**
@@ -2835,7 +3045,7 @@ export class FixedBytesType extends Type {
     }
 
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (convertTo instanceof FixedBytesType)
+        if (isFixedBytesType(convertTo))
             return convertTo.numBytes >= this.numBytes;
         else
             return false;
@@ -2850,33 +3060,32 @@ export class FixedBytesType extends Type {
     public get identifier(): string { return "t_bytes" + this.numBytes; }
 
     public equals(other: Type): boolean {
-        return other instanceof FixedBytesType &&
-            other.numBytes === this.numBytes;
+        return isFixedBytesType(other) && other.numBytes === this.numBytes;
     }
 
-    public unaryOperatorResult(_operator: TokenName): Type | undefined {
+    public unaryOperatorResult(_operator: Token.TokenName): Type | undefined {
         // "delete" and "~" is okay for FixedBytesType
-        if (_operator === TokenName.Delete)
+        if (_operator === Token.TokenName.Delete)
             return new TupleType();
-        else if (_operator === TokenName.BitNot)
+        else if (_operator === Token.TokenName.BitNot)
             return this;
         return undefined;
     }
 
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
-        if (isShiftOp(operator)) {
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
+        if (Token.isShiftOp(operator)) {
             if (isValidShiftAndAmountType(operator, other))
                 return this;
             else
                 return undefined;
         }
 
-        const commonType = Type.commonType(this, other) as FixedBytesType;
-        if (!commonType)
+        const commonType = Type.commonType(this, other);
+        if (!isFixedBytesType(commonType))
             return undefined;
 
         // FixedBytes can be compared and have bitwise operators applied to them
-        if (isCompareOp(operator) || isBitOp(operator))
+        if (Token.isCompareOp(operator) || Token.isBitOp(operator))
             return commonType;
 
         return undefined;
@@ -2899,6 +3108,10 @@ export class FixedBytesType extends Type {
     public interfaceType(_inLibrary: boolean): Type | undefined { return this; }
 }
 
+export function isFixedBytesType(t: Type): t is FixedBytesType {
+    return t.category === TypeCategory.FixedBytes;
+}
+
 /**
  * The boolean type.
  */
@@ -2906,17 +3119,17 @@ export class BoolType extends Type {
     public get category(): TypeCategory { return TypeCategory.Bool; }
     public get identifier(): string { return "t_bool"; }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
-        if (operator === TokenName.Delete)
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
+        if (operator === Token.TokenName.Delete)
             return new TupleType();
-        return (operator === TokenName.Not) ? this : undefined;
+        return (operator === Token.TokenName.Not) ? this : undefined;
 
     }
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
-        if (!(other instanceof BoolType))
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
+        if (!isBoolType(other))
             return undefined;
 
-        if (isCompareOp(operator) || operator === TokenName.And || operator === TokenName.Or)
+        if (Token.isCompareOp(operator) || operator === Token.TokenName.And || operator === Token.TokenName.Or)
             return other;
         else
             return undefined;
@@ -2929,9 +3142,9 @@ export class BoolType extends Type {
     public toString(_short?: boolean): string { return "bool"; }
     public literalValue(literal?: Literal): u256 {
         Debug.assert(!!literal);
-        if (literal.token === TokenName.TrueLiteral)
+        if (literal.token === Token.TokenName.TrueLiteral)
             return new BN(1);
-        else if (literal.token === TokenName.FalseLiteral)
+        else if (literal.token === Token.TokenName.FalseLiteral)
             return new BN(0);
         else
             Debug.assert(false, "Bool type constructed from non-boolean literal.");
@@ -2939,8 +3152,11 @@ export class BoolType extends Type {
 
     public get encodingType(): Type { return this; }
     public interfaceType(_: boolean): Type | undefined { return this; }
-};
+}
 
+export function isBoolType(t: Type): t is BoolType {
+    return t.category === TypeCategory.Bool;
+}
 
 /**
  * Base class used by types which are not value types and can be stored either in storage, memory
@@ -2953,8 +3169,8 @@ export abstract class ReferenceType extends Type {
         super();
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
-        if (operator !== TokenName.Delete)
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
+        if (operator !== Token.TokenName.Delete)
             return undefined;
         // delete can be used on everything except calldata references or storage pointers
         // (storage references are ok)
@@ -2970,7 +3186,7 @@ export abstract class ReferenceType extends Type {
         }
         return undefined;
     }
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
 
     public get memoryHeadSize(): number { return 32; }
 
@@ -2989,7 +3205,7 @@ export abstract class ReferenceType extends Type {
     public isPointer(): boolean { return this._isPointer; }
 
     public equals(other: Type): boolean {
-        return other instanceof ReferenceType &&
+        return isReferenceType(other) &&
             this.location === other.location &&
             this._isPointer === other._isPointer;
     }
@@ -2998,7 +3214,7 @@ export abstract class ReferenceType extends Type {
     /// if _type is a reference type and an unmodified copy of _type otherwise.
     /// This function is mostly useful to modify inner types appropriately.
     public static copyForLocationIfReference(location: DataLocation, type: Type): Type {
-        if (type instanceof ReferenceType) {
+        if (isReferenceType(type)) {
             return type.copyForLocation(location, false);
         }
         return type;
@@ -3035,6 +3251,10 @@ export abstract class ReferenceType extends Type {
             id += "_ptr";
         return id;
     }
+}
+
+export function isReferenceType(t: Type): t is ReferenceType {
+    return t instanceof ReferenceType;
 }
 
 /// String is interpreted as a subtype of Bytes.
@@ -3087,7 +3307,7 @@ export class ArrayType extends ReferenceType {
     }
 
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (!(convertTo instanceof ArrayType))
+        if (!isArrayType(convertTo))
             return false;
         if (convertTo.isByteArray() !== this.isByteArray() || convertTo.isString() !== this.isString())
             return false;
@@ -3123,7 +3343,7 @@ export class ArrayType extends ReferenceType {
         if (this.isImplicitlyConvertibleTo(convertTo))
             return true;
         // allow conversion bytes <-> string
-        if (!(convertTo instanceof ArrayType))
+        if (!isArrayType(convertTo))
             return false;
         if (convertTo.location !== this.location)
             return false;
@@ -3152,7 +3372,7 @@ export class ArrayType extends ReferenceType {
     }
 
     public equals(other: Type): boolean {
-        if (!(other instanceof ArrayType))
+        if (!isArrayType(other))
             return false;
         if (
             !super.equals(other) ||
@@ -3343,6 +3563,10 @@ export class ArrayType extends ReferenceType {
     }
 }
 
+export function isArrayType(t: Type): t is ArrayType {
+    return t.category === TypeCategory.Array;
+}
+
 /**
  * The type of a contract instance or library, there is one distinct type for each contract definition.
  */
@@ -3361,9 +3585,9 @@ export class ContractType extends Type {
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
         if (this.equals(convertTo))
             return true;
-        if (convertTo instanceof IntegerType)
+        if (isIntegerType(convertTo))
             return convertTo.isAddress();
-        if (convertTo instanceof ContractType) {
+        if (isContractType(convertTo)) {
             const bases = this.contractDefinition.annotation.linearizedBaseContracts;
             if (this._isSuper && bases.length <= 1)
                 return false;
@@ -3378,8 +3602,8 @@ export class ContractType extends Type {
             convertTo.category === TypeCategory.Contract;
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
-        return operator === TokenName.Delete ? new TupleType() : undefined;
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
+        return operator === Token.TokenName.Delete ? new TupleType() : undefined;
     }
 
     public get identifier(): string {
@@ -3387,7 +3611,7 @@ export class ContractType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof ContractType &&
+        return isContractType(other) &&
             other.contractDefinition === this.contractDefinition &&
             other._isSuper === this._isSuper;
     }
@@ -3426,8 +3650,7 @@ export class ContractType extends Type {
                     for (const member of members) {
                         if (member.name !== funDef.name)
                             continue;
-                        const memberType = member.type as FunctionType;
-                        Debug.assert(!!memberType, "Override changes type.");
+                        const memberType = cast(member.type, isFunctionType);
                         if (!memberType.hasEqualArgumentTypes(functionType))
                             continue;
                         functionWithEqualArgumentsFound = true;
@@ -3514,10 +3737,7 @@ export class ContractType extends Type {
                         // Members with different types are not allowed
                         member.type.category !== addressMember.type.category ||
                         // Members must overload functions without clash
-                        (
-                            member.type.category === TypeCategory.Function &&
-                            (member.type as FunctionType).hasEqualArgumentTypes(addressMember.type as FunctionType)
-                        )
+                        (isFunctionType(member.type) && isFunctionType(addressMember.type) && member.type.hasEqualArgumentTypes(addressMember.type))
                     )
                 ) {
                     clash = true;
@@ -3535,6 +3755,10 @@ export class ContractType extends Type {
     }
 }
 
+export function isContractType(t: Type): t is ContractType {
+    return t.category === TypeCategory.Contract;
+}
+
 /**
  * The type of a struct instance, there is one distinct type per struct definition.
  */
@@ -3549,7 +3773,7 @@ export class StructType extends ReferenceType {
     }
 
     public isImplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (!(convertTo instanceof StructType))
+        if (!isStructType(convertTo))
             return false;
         // memory/calldata to storage can be converted, but only to a direct storage reference
         if (convertTo.location === DataLocation.Storage && this.location !== DataLocation.Storage && convertTo.isPointer())
@@ -3564,7 +3788,7 @@ export class StructType extends ReferenceType {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof StructType &&
+        return isStructType(other) &&
             super.equals(other) &&
             other.structDefinition === this.structDefinition;
     }
@@ -3757,10 +3981,10 @@ export class StructType extends ReferenceType {
                 structsSeen.add(str);
                 for (const variable of str.members) {
                     let memberType = variable.annotation.type;
-                    while (memberType instanceof ArrayType) {
+                    while (isArrayType(memberType)) {
                         memberType = memberType.baseType;
                     }
-                    if (memberType instanceof StructType) {
+                    if (isStructType(memberType)) {
                         if (check(memberType))
                             return true;
                     }
@@ -3773,6 +3997,10 @@ export class StructType extends ReferenceType {
     }
 }
 
+export function isStructType(t: Type): t is StructType {
+    return t.category === TypeCategory.Struct;
+}
+
 /**
  * The type of an enum instance, there is one distinct type per enum definition.
  */
@@ -3783,8 +4011,8 @@ export class EnumType extends Type {
         super();
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
-        return operator === TokenName.Delete ? new TupleType() : undefined;
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
+        return operator === Token.TokenName.Delete ? new TupleType() : undefined;
     }
 
     public get identifier(): string {
@@ -3794,7 +4022,7 @@ export class EnumType extends Type {
     public equals(other: Type): boolean {
         if (other.category !== this.category)
             return false;
-        return other instanceof EnumType && other.enumDefinition === this.enumDefinition;
+        return isEnumType(other) && other.enumDefinition === this.enumDefinition;
     }
 
     public calldataEncodedSize(padded: boolean): number {
@@ -3845,6 +4073,10 @@ export class EnumType extends Type {
     }
 }
 
+export function isEnumType(t: Type): t is EnumType {
+    return t.category === TypeCategory.Enum;
+}
+
 /**
  * Type that can hold a finite sequence of values of different types.
  * In some cases, the components are empty pointers (when used as placeholders).
@@ -3857,7 +4089,7 @@ export class TupleType extends Type {
     }
 
     public isImplicitlyConvertibleTo(other: Type): boolean {
-        if (other instanceof TupleType) {
+        if (isTupleType(other)) {
             const targets = other.components;
             if (targets.length === 0)
                 return this.components.length === 0;
@@ -3889,11 +4121,11 @@ export class TupleType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof TupleType &&
+        return isTupleType(other) &&
             arrayIsEqualTo(this.components, other.components, (a, b) => a.equals(b));
     }
 
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
 
     public toString(short: boolean): string {
         if (this.components.length === 0)
@@ -3937,7 +4169,7 @@ export class TupleType extends Type {
     /// Converts components to their temporary types and performs some wildcard matching.
     public closestTemporaryType(targetType: Type): Type {
         Debug.assert(!!targetType);
-        if (targetType instanceof TupleType) {
+        if (isTupleType(targetType)) {
             const targetComponents = targetType.components;
             const fillRight = targetComponents.length !== 0 && (!lastOrUndefined(targetComponents) || firstOrUndefined(targetComponents));
             const tempComponents: Type[] = [];
@@ -3952,6 +4184,10 @@ export class TupleType extends Type {
             return new TupleType(tempComponents);
         }
     }
+}
+
+export function isTupleType(t: Type): t is TupleType {
+    return t.category === TypeCategory.Tuple;
 }
 
 /// How this function is invoked on the EVM.
@@ -4045,12 +4281,12 @@ export class FunctionType extends Type {
         let returnType = varDecl.annotation.type;
 
         while (true) {
-            if (returnType instanceof MappingType) {
+            if (isMappingType(returnType)) {
                 paramTypes.push(returnType.keyType);
                 paramNames.push("");
                 returnType = returnType.valueType;
             }
-            else if (returnType instanceof ArrayType) {
+            else if (isArrayType(returnType)) {
                 if (returnType.isByteArray()) // Return byte arrays as as whole.
                     break;
                 returnType = returnType.baseType;
@@ -4063,12 +4299,12 @@ export class FunctionType extends Type {
 
         const retParams: Type[] = [];
         const retParamNames: string[] = [];
-        if (returnType instanceof StructType) {
+        if (isStructType(returnType)) {
             for (const member of returnType.members(null).memberTypes) {
                 Debug.assert(!!member.type);
                 if (member.type.category !== TypeCategory.Mapping) {
-                    const arrayType = member.type as ArrayType;
-                    if (arrayType) {
+                    const arrayType = member.type;
+                    if (isArrayType(arrayType)) {
                         if (!arrayType.isByteArray())
                             continue;
                     }
@@ -4286,7 +4522,7 @@ export class FunctionType extends Type {
     }
 
     public equals(other: Type): boolean {
-        if (!(other instanceof FunctionType))
+        if (!isFunctionType(other))
             return false;
 
         if (this.kind !== other.kind ||
@@ -4309,20 +4545,20 @@ export class FunctionType extends Type {
     }
 
     public isExplicitlyConvertibleTo(convertTo: Type): boolean {
-        if (this.kind === FunctionKind.External && convertTo instanceof IntegerType) {
+        if (this.kind === FunctionKind.External && isIntegerType(convertTo)) {
             if (convertTo.isAddress())
                 return true;
         }
         return convertTo.category === this.category;
     }
 
-    public unaryOperatorResult(operator: TokenName): Type | undefined {
-        if (operator === TokenName.Delete)
+    public unaryOperatorResult(operator: Token.TokenName): Type | undefined {
+        if (operator === Token.TokenName.Delete)
             return new TupleType();
         return undefined;
     }
-    public binaryOperatorResult(operator: TokenName, other: Type): Type | undefined {
-        if (!(other instanceof FunctionType) || !(operator === TokenName.Equal || operator === TokenName.NotEqual))
+    public binaryOperatorResult(operator: Token.TokenName, other: Type): Type | undefined {
+        if (!isFunctionType(other) || !(operator === Token.TokenName.Equal || operator === Token.TokenName.NotEqual))
             return undefined;
 
         if (this.kind === FunctionKind.Internal && other.kind === FunctionKind.Internal &&
@@ -4384,7 +4620,7 @@ export class FunctionType extends Type {
         let kind = this.kind;
         if (kind === FunctionKind.SetGas || kind === FunctionKind.SetValue) {
             Debug.assert(this._returnParameterTypes.length === 1);
-            kind = (first(this._returnParameterTypes) as FunctionType).kind;
+            kind = cast(first(this._returnParameterTypes), isFunctionType).kind;
         }
 
         let size = 0;
@@ -4490,7 +4726,7 @@ export class FunctionType extends Type {
     public get interfaceFunctionType(): FunctionType | undefined {
         // Note that m_declaration might also be a state variable!
         Debug.assert(!!this._declaration, "Declaration needed to determine interface function type.");
-        const isLibraryFunction = (this._declaration.scope as ContractDefinition).isLibrary();
+        const isLibraryFunction = cast(this._declaration.scope, isContractDefinition).isLibrary();
 
         const paramTypes: Type[] = [];
         const retParamTypes: Type[] = [];
@@ -4509,7 +4745,7 @@ export class FunctionType extends Type {
             else
                 return undefined;
         }
-        const variable = this._declaration as VariableDeclaration;
+        const variable = tryCast(this._declaration, isVariableDeclaration);
         if (variable && retParamTypes.length === 0)
             return undefined;
 
@@ -4565,7 +4801,7 @@ export class FunctionType extends Type {
         Debug.assert(!!this._declaration, "External signature of function needs declaration");
         Debug.assert(this._declaration.name !== "", "Fallback function has no signature.");
 
-        const inLibrary = (this._declaration.scope as ContractDefinition).isLibrary();
+        const inLibrary = cast(this._declaration.scope, isContractDefinition).isLibrary();
         const external = this.interfaceFunctionType;
         Debug.assert(!!external, "External function type requested.");
         const parameterTypes = external.parameterTypes;
@@ -4659,8 +4895,8 @@ export class FunctionType extends Type {
 
         const parameterTypes: Type[] = [];
         for (const t of this._parameterTypes) {
-            const refType = t as ReferenceType;
-            if (refType && refType.location === DataLocation.CallData)
+            const refType = t;
+            if (isReferenceType(refType) && refType.location === DataLocation.CallData)
                 parameterTypes.push(refType.copyForLocation(DataLocation.Memory, true));
             else
                 parameterTypes.push(t);
@@ -4707,6 +4943,10 @@ export class FunctionType extends Type {
     }
 }
 
+export function isFunctionType(t: Type): t is FunctionType {
+    return t.category === TypeCategory.Function;
+}
+
 /**
  * The type of a mapping, there is one distinct type per key/value type pair.
  * Mappings always occupy their own storage slot, but do not actually use it.
@@ -4723,7 +4963,7 @@ export class MappingType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof MappingType &&
+        return isMappingType(other) &&
             other.keyType.equals(this.keyType) &&
             other.valueType.equals(this.valueType);
     }
@@ -4738,7 +4978,7 @@ export class MappingType extends Type {
 
     public canLiveOutsideStorage(): boolean { return false; }
 
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
 
     public get encodingType(): Type {
         return new IntegerType(256);
@@ -4748,6 +4988,10 @@ export class MappingType extends Type {
     }
 
     public dataStoredIn(location: DataLocation): boolean { return location === DataLocation.Storage; }
+}
+
+export function isMappingType(t: Type): t is MappingType {
+    return t.category === TypeCategory.Mapping;
 }
 
 /**
@@ -4761,14 +5005,14 @@ export class TypeType extends Type {
         super();
     }
 
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
 
     public get identifier(): string {
         return "t_type" + identifierList(this.actualType);
     }
 
     public equals(other: Type): boolean {
-        return other instanceof TypeType && this.actualType.equals(other.actualType);
+        return isTypeType(other) && this.actualType.equals(other.actualType);
     }
 
     public canBeStored(): boolean { return false; }
@@ -4778,7 +5022,7 @@ export class TypeType extends Type {
     }
     public canLiveOutsideStorage(): boolean { return false; }
     public get sizeOnStack(): number {
-        if (this.actualType instanceof ContractType) {
+        if (isContractType(this.actualType)) {
             const contractType = this.actualType;
             if (contractType.contractDefinition.isLibrary())
                 return 1;
@@ -4792,7 +5036,7 @@ export class TypeType extends Type {
 
     public nativeMembers(currentScope: ContractDefinition): MemberMap {
         const members: MemberMap = [];
-        if (this.actualType instanceof ContractType) {
+        if (isContractType(this.actualType)) {
             const contract = this.actualType.contractDefinition;
             let isBase = false;
             if (currentScope) {
@@ -4822,7 +5066,7 @@ export class TypeType extends Type {
                     members.push(new Member(enu.name, enu.type, enu));
             }
         }
-        else if (this.actualType instanceof EnumType) {
+        else if (isEnumType(this.actualType)) {
             const enumDef = this.actualType.enumDefinition;
             const enumType = new EnumType(enumDef);
             for (const enumValue of enumDef.members)
@@ -4830,6 +5074,10 @@ export class TypeType extends Type {
         }
         return members;
     }
+}
+
+export function isTypeType(t: Type): t is TypeType {
+    return t.category === TypeCategory.TypeType;
 }
 
 /**
@@ -4845,7 +5093,7 @@ export class ModifierType extends Type {
             this.parameterTypes.push(varDecl.annotation.type);
     }
 
-    public binaryOperatorResult(_operator: TokenName, _type: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _type: Type): Type | undefined { return undefined; }
 
     public canBeStored(): boolean { return false; }
 
@@ -4862,7 +5110,7 @@ export class ModifierType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof ModifierType &&
+        return isModifierType(other) &&
             arrayIsEqualTo(this.parameterTypes, other.parameterTypes, (a, b) => a.equals(b));
     }
 
@@ -4871,6 +5119,10 @@ export class ModifierType extends Type {
         name += this.parameterTypes.map(t => t.toString(short)).join(",");
         return name + ")";
     }
+}
+
+export function isModifierType(t: Type): t is ModifierType {
+    return t.category === TypeCategory.Modifier;
 }
 
 /**
@@ -4883,15 +5135,14 @@ export class ModuleType extends Type {
         super();
     }
 
-    public binaryOperatorResult(_operator: TokenName, _type: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _type: Type): Type | undefined { return undefined; }
 
     public get identifier(): string {
         return "t_module_" + this.sourceUnit.id;
     }
 
     public equals(other: Type): boolean {
-        return other instanceof ModuleType &&
-            this.sourceUnit === other.sourceUnit;
+        return isModuleType(other) && this.sourceUnit === other.sourceUnit;
     }
 
     public canBeStored(): boolean { return false; }
@@ -4912,6 +5163,10 @@ export class ModuleType extends Type {
     }
 }
 
+export function isModuleType(t: Type): t is ModuleType {
+    return t.category === TypeCategory.Module;
+}
+
 export const enum MagicKind { Block, Message, Transaction }
 
 /**
@@ -4925,7 +5180,7 @@ export class MagicType extends Type {
         super();
     }
 
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined {
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined {
         return undefined;
     }
 
@@ -4944,7 +5199,7 @@ export class MagicType extends Type {
     }
 
     public equals(other: Type): boolean {
-        return other instanceof MagicType && other.kind === this.kind;
+        return isMagicType(other) && other.kind === this.kind;
     }
 
     public canBeStored(): boolean { return false; }
@@ -4994,6 +5249,10 @@ export class MagicType extends Type {
     }
 }
 
+export function isMagicType(t: Type): t is MagicType {
+    return t.category === TypeCategory.Magic;
+}
+
 /**
  * Special type that is used for dynamic types in returns from external function calls
  * (The EVM currently cannot access dynamically-sized return values).
@@ -5004,7 +5263,7 @@ export class InaccessibleDynamicType extends Type {
     public get identifier(): string { return "t_inaccessible"; }
     public isImplicitlyConvertibleTo(_other: Type): boolean { return false; }
     public isExplicitlyConvertibleTo(_other: Type): boolean { return false; }
-    public binaryOperatorResult(_operator: TokenName, _other: Type): Type | undefined { return undefined; }
+    public binaryOperatorResult(_operator: Token.TokenName, _other: Type): Type | undefined { return undefined; }
     public calldataEncodedSize(_padded: boolean): number { return 32; }
     public canBeStored(): boolean { return false; }
     public canLiveOutsideStorage(): boolean { return false; }
@@ -5014,13 +5273,17 @@ export class InaccessibleDynamicType extends Type {
     public get decodingType(): Type { return new IntegerType(256); }
 }
 
-function isValidShiftAndAmountType(operator: TokenName, shiftAmountType: Type): boolean {
+export function isInaccessibleDynamicType(t: Type): t is InaccessibleDynamicType {
+    return t.category === TypeCategory.InaccessibleDynamic;
+}
+
+function isValidShiftAndAmountType(operator: Token.TokenName, shiftAmountType: Type): boolean {
     // Disable >>> here.
-    if (operator === TokenName.SHR)
+    if (operator === Token.TokenName.SHR)
         return false;
-    else if (shiftAmountType instanceof IntegerType)
+    else if (isIntegerType(shiftAmountType))
         return !shiftAmountType.isAddress();
-    else if (shiftAmountType instanceof RationalNumberType)
+    else if (isRationalNumberType(shiftAmountType))
         return shiftAmountType.integerType && !shiftAmountType.integerType.isSigned();
     else
         return false;

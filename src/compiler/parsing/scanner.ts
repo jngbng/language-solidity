@@ -1,5 +1,5 @@
 import { Debug, clone, } from "../core";
-import { ElementaryTypeNameToken, TokenName, fromIdentifierOrKeyword } from "../parsing/token";
+import { Token } from "../parsing/token";
 import { CharacterCodes, SourceLocation } from "../types";
 
 function isDecimalDigit(c: number): boolean {
@@ -77,13 +77,13 @@ export class CharStream {
 }
 
 export class TokenDesc {
-    token: TokenName;
+    token: Token.TokenName;
     location: SourceLocation;
     literal: number[];
     extendedTokenInfo: { m: number, n: number };
 
     constructor() {
-        this.token = TokenName.EOS;
+        this.token = Token.TokenName.EOS;
         this.location = new SourceLocation(0, 0);
         this.literal = [];
         this.extendedTokenInfo = { m: 0, n: 0 };
@@ -173,7 +173,7 @@ export class Scanner {
     }
 
     /// Returns the next token and advances input.
-    public next(): TokenName {
+    public next(): Token.TokenName {
         this._currentToken = this.nextToken.clone();
         this.skippedComment = this.nextSkippedComment.clone();
         this.scanToken();
@@ -181,13 +181,13 @@ export class Scanner {
         return this._currentToken.token;
     }
 
-    public get currentToken(): TokenName {
+    public get currentToken(): Token.TokenName {
         return this._currentToken.token;
     }
 
-    public get currentElementaryTypeNameToken(): ElementaryTypeNameToken {
+    public get currentElementaryTypeNameToken(): Token.ElementaryTypeNameToken {
         const { m, n } = this._currentToken.extendedTokenInfo;
-        return new ElementaryTypeNameToken(this._currentToken.token, m, n);
+        return new Token.ElementaryTypeNameToken(this._currentToken.token, m, n);
     }
 
     public get currentLocation(): SourceLocation {
@@ -214,7 +214,7 @@ export class Scanner {
     }
 
     /// @returns the next token without advancing input.
-    public peekNextToken(): TokenName {
+    public peekNextToken(): Token.TokenName {
         return this.nextToken.token;
     }
 
@@ -234,7 +234,7 @@ export class Scanner {
         this.nextToken.literal = [];
         this.nextSkippedComment.literal = [];
 
-        let token: TokenName;
+        let token: Token.TokenName;
         let m, n: number;
 
         do {
@@ -244,7 +244,7 @@ export class Scanner {
                 case CharacterCodes.lineFeed:
                 case CharacterCodes.space:
                 case CharacterCodes.tab:
-                    token = this.selectToken(TokenName.Whitespace);
+                    token = this.selectToken(Token.TokenName.Whitespace);
                     break;
                 case CharacterCodes.doubleQuote:
                 case CharacterCodes.singleQuote:
@@ -254,81 +254,81 @@ export class Scanner {
                     // < <= << <<=
                     this.advance();
                     if (this.char as number === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.LessThanOrEqual);
+                        token = this.selectToken(Token.TokenName.LessThanOrEqual);
                     else if (this.char === CharacterCodes.lessThan)
-                        token = this.selectTokenAlt(CharacterCodes.equals, TokenName.AssignShl, TokenName.SHL);
+                        token = this.selectTokenAlt(CharacterCodes.equals, Token.TokenName.AssignShl, Token.TokenName.SHL);
                     else
-                        token = TokenName.LessThan;
+                        token = Token.TokenName.LessThan;
                     break;
                 case CharacterCodes.greaterThan:
                     // > >= >> >>= >>> >>>=
                     this.advance();
                     if (this.char as number === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.GreaterThanOrEqual);
+                        token = this.selectToken(Token.TokenName.GreaterThanOrEqual);
                     else if (this.char === CharacterCodes.greaterThan) {
                         // >> >>= >>> >>>=
                         this.advance();
                         if (this.char as number === CharacterCodes.equals)
-                            token = this.selectToken(TokenName.AssignSar);
+                            token = this.selectToken(Token.TokenName.AssignSar);
                         else if (this.char === CharacterCodes.greaterThan)
-                            token = this.selectTokenAlt(CharacterCodes.equals, TokenName.AssignShr, TokenName.SHR);
+                            token = this.selectTokenAlt(CharacterCodes.equals, Token.TokenName.AssignShr, Token.TokenName.SHR);
                         else
-                            token = TokenName.SAR;
+                            token = Token.TokenName.SAR;
                     }
                     else
-                        token = TokenName.GreaterThan;
+                        token = Token.TokenName.GreaterThan;
                     break;
                 case CharacterCodes.equals:
                     // = == =>
                     this.advance();
                     if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.Equal);
+                        token = this.selectToken(Token.TokenName.Equal);
                     else if (this.char === CharacterCodes.greaterThan)
-                        token = this.selectToken(TokenName.Arrow);
+                        token = this.selectToken(Token.TokenName.Arrow);
                     else
-                        token = TokenName.Assign;
+                        token = Token.TokenName.Assign;
                     break;
                 case CharacterCodes.exclamation:
                     // ! !=
                     this.advance();
                     if (this.char as number === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.NotEqual);
+                        token = this.selectToken(Token.TokenName.NotEqual);
                     else
-                        token = TokenName.Not;
+                        token = Token.TokenName.Not;
                     break;
                 case CharacterCodes.plus:
                     // + ++ +=
                     this.advance();
                     if (this.char === CharacterCodes.plus)
-                        token = this.selectToken(TokenName.Inc);
+                        token = this.selectToken(Token.TokenName.Inc);
                     else if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.AssignAdd);
+                        token = this.selectToken(Token.TokenName.AssignAdd);
                     else
-                        token = TokenName.Add;
+                        token = Token.TokenName.Add;
                     break;
                 case CharacterCodes.minus:
                     // - -- -=
                     this.advance();
                     if (this.char === CharacterCodes.minus)
-                        token = this.selectToken(TokenName.Dec);
+                        token = this.selectToken(Token.TokenName.Dec);
                     else if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.AssignSub);
+                        token = this.selectToken(Token.TokenName.AssignSub);
                     else
-                        token = TokenName.Sub;
+                        token = Token.TokenName.Sub;
                     break;
                 case CharacterCodes.asterisk:
                     // * ** *=
                     this.advance();
                     if (this.char === CharacterCodes.asterisk)
-                        token = this.selectToken(TokenName.Exp);
+                        token = this.selectToken(Token.TokenName.Exp);
                     else if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.AssignMul);
+                        token = this.selectToken(Token.TokenName.AssignMul);
                     else
-                        token = TokenName.Mul;
+                        token = Token.TokenName.Mul;
                     break;
                 case CharacterCodes.percent:
                     // % %=
-                    token = this.selectTokenAlt(CharacterCodes.equals, TokenName.AssignMod, TokenName.Mod);
+                    token = this.selectTokenAlt(CharacterCodes.equals, Token.TokenName.AssignMod, Token.TokenName.Mod);
                     break;
                 case CharacterCodes.slash:
                     // /  // /* /=
@@ -338,25 +338,25 @@ export class Scanner {
                     // & && &=
                     this.advance();
                     if (this.char === CharacterCodes.ampersand)
-                        token = this.selectToken(TokenName.And);
+                        token = this.selectToken(Token.TokenName.And);
                     else if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.AssignBitAnd);
+                        token = this.selectToken(Token.TokenName.AssignBitAnd);
                     else
-                        token = TokenName.BitAnd;
+                        token = Token.TokenName.BitAnd;
                     break;
                 case CharacterCodes.bar:
                     // | || |=
                     this.advance();
                     if (this.char === CharacterCodes.bar)
-                        token = this.selectToken(TokenName.Or);
+                        token = this.selectToken(Token.TokenName.Or);
                     else if (this.char === CharacterCodes.equals)
-                        token = this.selectToken(TokenName.AssignBitOr);
+                        token = this.selectToken(Token.TokenName.AssignBitOr);
                     else
-                        token = TokenName.BitOr;
+                        token = Token.TokenName.BitOr;
                     break;
                 case CharacterCodes.caret:
                     // ^ ^=
-                    token = this.selectTokenAlt(CharacterCodes.equals, TokenName.AssignBitXor, TokenName.BitXor);
+                    token = this.selectTokenAlt(CharacterCodes.equals, Token.TokenName.AssignBitXor, Token.TokenName.BitXor);
                     break;
                 case CharacterCodes.dot:
                     // . Number
@@ -364,40 +364,40 @@ export class Scanner {
                     if (isDecimalDigit(this.char))
                         token = this.scanNumber(CharacterCodes.dot);
                     else
-                        token = TokenName.Period;
+                        token = Token.TokenName.Period;
                     break;
                 case CharacterCodes.colon:
-                    token = this.selectToken(TokenName.Colon);
+                    token = this.selectToken(Token.TokenName.Colon);
                     break;
                 case CharacterCodes.semicolon:
-                    token = this.selectToken(TokenName.Semicolon);
+                    token = this.selectToken(Token.TokenName.Semicolon);
                     break;
                 case CharacterCodes.comma:
-                    token = this.selectToken(TokenName.Comma);
+                    token = this.selectToken(Token.TokenName.Comma);
                     break;
                 case CharacterCodes.openParen:
-                    token = this.selectToken(TokenName.LParen);
+                    token = this.selectToken(Token.TokenName.LParen);
                     break;
                 case CharacterCodes.closeParen:
-                    token = this.selectToken(TokenName.RParen);
+                    token = this.selectToken(Token.TokenName.RParen);
                     break;
                 case CharacterCodes.openBracket:
-                    token = this.selectToken(TokenName.LBrack);
+                    token = this.selectToken(Token.TokenName.LBrack);
                     break;
                 case CharacterCodes.closeBracket:
-                    token = this.selectToken(TokenName.RBrack);
+                    token = this.selectToken(Token.TokenName.RBrack);
                     break;
                 case CharacterCodes.openBrace:
-                    token = this.selectToken(TokenName.LBrace);
+                    token = this.selectToken(Token.TokenName.LBrace);
                     break;
                 case CharacterCodes.closeBrace:
-                    token = this.selectToken(TokenName.RBrace);
+                    token = this.selectToken(Token.TokenName.RBrace);
                     break;
                 case CharacterCodes.question:
-                    token = this.selectToken(TokenName.Conditional);
+                    token = this.selectToken(Token.TokenName.Conditional);
                     break;
                 case CharacterCodes.tilde:
-                    token = this.selectToken(TokenName.BitNot);
+                    token = this.selectToken(Token.TokenName.BitNot);
                     break;
                 default:
                     if (isIdentifierStart(this.char)) {
@@ -407,7 +407,7 @@ export class Scanner {
                         n = result.n;
 
                         // Special case for hexademical literals
-                        if (token === TokenName.Hex) {
+                        if (token === Token.TokenName.Hex) {
                             // reset
                             m = 0;
                             n = 0;
@@ -416,28 +416,28 @@ export class Scanner {
                             if (this.char === CharacterCodes.doubleQuote || this.char === CharacterCodes.singleQuote)
                                 token = this.scanHexString();
                             else
-                                token = TokenName.Illegal;
+                                token = Token.TokenName.Illegal;
                         }
                     }
                     else if (isDecimalDigit(this.char))
                         token = this.scanNumber();
                     else if (this.skipWhitespace())
-                        token = TokenName.Whitespace;
+                        token = Token.TokenName.Whitespace;
                     else if (this.isSourcePastEndOfInput())
-                        token = TokenName.EOS;
+                        token = Token.TokenName.EOS;
                     else
-                        token = this.selectToken(TokenName.Illegal);
+                        token = this.selectToken(Token.TokenName.Illegal);
                     break;
             }
             // Continue scanning for tokens as long as we're just skipping
             // whitespace.
-        } while (token === TokenName.Whitespace);
+        } while (token === Token.TokenName.Whitespace);
         this.nextToken.location.end = this.sourcePos;
         this.nextToken.token = token;
         this.nextToken.extendedTokenInfo = { m, n };
     }
 
-    private scanIdentifierOrKeyword(): { token: TokenName, m: number, n: number } {
+    private scanIdentifierOrKeyword(): { token: Token.TokenName, m: number, n: number } {
         Debug.assert(isIdentifierStart(this.char));
         const literal = new LiteralScope(this, LiteralType.String);
         try {
@@ -446,13 +446,13 @@ export class Scanner {
             while (isIdentifierPart(this.char)) // get full literal
                 this.addLiteralCharAndAdvance();
             literal.complete();
-            return fromIdentifierOrKeyword(this.nextToken.literal);
+            return Token.fromIdentifierOrKeyword(this.nextToken.literal);
         } finally {
             literal.destroy();
         }
     }
 
-    private scanString(): TokenName {
+    private scanString(): Token.TokenName {
         const quote = this.char;
         this.advance();  // consume quote
 
@@ -463,22 +463,22 @@ export class Scanner {
                 this.advance();
                 if (c === CharacterCodes.backslash) {
                     if (this.isSourcePastEndOfInput() || !this.scanEscape())
-                        return TokenName.Illegal;
+                        return Token.TokenName.Illegal;
                 }
                 else
                     this.addLiteralChar(c);
             }
             if (this.char !== quote)
-                return TokenName.Illegal;
+                return Token.TokenName.Illegal;
             literal.complete();
             this.advance();  // consume quote
-            return TokenName.StringLiteral;
+            return Token.TokenName.StringLiteral;
         } finally {
             literal.destroy();
         }
     }
 
-    private scanNumber(charSeen = 0): TokenName {
+    private scanNumber(charSeen = 0): Token.TokenName {
         let kind = NumberKind.Decimal;
         const literal = new LiteralScope(this, LiteralType.Number);
         try {
@@ -498,13 +498,13 @@ export class Scanner {
                         kind = NumberKind.Hex;
                         this.addLiteralCharAndAdvance();
                         if (!isHexDigit(this.char))
-                            return TokenName.Illegal; // we must have at least one hex digit after 'x'/'X'
+                            return Token.TokenName.Illegal; // we must have at least one hex digit after 'x'/'X'
                         while (isHexDigit(this.char))
                             this.addLiteralCharAndAdvance();
                     }
                     else if (isDecimalDigit(this.char))
                         // We do not allow octal numbers
-                        return TokenName.Illegal;
+                        return Token.TokenName.Illegal;
                 }
                 // Parse decimal digits and allow trailing fractional part.
                 if (kind === NumberKind.Decimal) {
@@ -519,13 +519,13 @@ export class Scanner {
             if (this.char === CharacterCodes.e || this.char === CharacterCodes.E) {
                 Debug.assert(kind !== NumberKind.Hex, "'e'/'E' must be scanned as part of the hex number");
                 if (kind !== NumberKind.Decimal)
-                    return TokenName.Illegal;
+                    return Token.TokenName.Illegal;
                 // scan exponent
                 this.addLiteralCharAndAdvance();
                 if (this.char as number === CharacterCodes.plus || this.char as number === CharacterCodes.minus)
                     this.addLiteralCharAndAdvance();
                 if (!isDecimalDigit(this.char))
-                    return TokenName.Illegal; // we must have at least one decimal digit after 'e'/'E'
+                    return Token.TokenName.Illegal; // we must have at least one decimal digit after 'e'/'E'
                 this.scanDecimalDigits();
             }
             // The source character immediately following a numeric literal must
@@ -533,9 +533,9 @@ export class Scanner {
             // section 7.8.3, page 17 (note that we read only one decimal digit
             // if the value is 0).
             if (isDecimalDigit(this.char) || isIdentifierStart(this.char))
-                return TokenName.Illegal;
+                return Token.TokenName.Illegal;
             literal.complete();
-            return TokenName.Number;
+            return Token.TokenName.Number;
         } finally {
             literal.destroy();
         }
@@ -546,21 +546,21 @@ export class Scanner {
             this.addLiteralCharAndAdvance();
     }
 
-    private scanHexString(): TokenName {
+    private scanHexString(): Token.TokenName {
         const quote = this.char;
         this.advance();  // consume quote
         const literal = new LiteralScope(this, LiteralType.String);
         while (this.char !== quote && !this.isSourcePastEndOfInput() && !isLineTerminator(this.char)) {
             const c = this.scanHexByte();
             if (c === undefined)
-                return TokenName.Illegal;
+                return Token.TokenName.Illegal;
             this.addLiteralChar(c);
         }
         if (this.char !== quote)
-            return TokenName.Illegal;
+            return Token.TokenName.Illegal;
         literal.complete();
         this.advance();  // consume quote
-        return TokenName.StringLiteral;
+        return Token.TokenName.StringLiteral;
     }
 
     private scanEscape(): boolean {
@@ -639,19 +639,19 @@ export class Scanner {
         return x;
     }
 
-    private scanSlash(): TokenName {
+    private scanSlash(): Token.TokenName {
         const firstSlashPosition = this.sourcePos;
         this.advance();
         if (this.char === CharacterCodes.slash) {
             if (!this.advance()) /* double slash comment directly before EOS */
-                return TokenName.Whitespace;
+                return Token.TokenName.Whitespace;
             else if (this.char === CharacterCodes.slash) {
                 // doxygen style /// comment
                 this.nextSkippedComment.location.start = firstSlashPosition;
                 const comment = this.scanSingleLineDocComment();
                 this.nextSkippedComment.location.end = this.sourcePos;
                 this.nextSkippedComment.token = comment;
-                return TokenName.Whitespace;
+                return Token.TokenName.Whitespace;
             }
             else
                 return this.skipSingleLineComment();
@@ -659,7 +659,7 @@ export class Scanner {
         else if (this.char === CharacterCodes.asterisk) {
             // doxygen style /** natspec comment
             if (!this.advance()) /* slash star comment before EOS */
-                return TokenName.Whitespace;
+                return Token.TokenName.Whitespace;
             else if (this.char === CharacterCodes.asterisk) {
                 this.advance(); // consume the last '*' at /**
                 this.skipWhitespaceExceptLF();
@@ -673,18 +673,18 @@ export class Scanner {
                     this.nextSkippedComment.location.end = this.sourcePos;
                     this.nextSkippedComment.token = comment;
                 }
-                return TokenName.Whitespace;
+                return Token.TokenName.Whitespace;
             }
             else
                 return this.skipMultiLineComment();
         }
         else if (this.char === CharacterCodes.equals)
-            return this.selectToken(TokenName.AssignDiv);
+            return this.selectToken(Token.TokenName.AssignDiv);
         else
-            return TokenName.Div;
+            return Token.TokenName.Div;
     }
 
-    private scanSingleLineDocComment(): TokenName {
+    private scanSingleLineDocComment(): Token.TokenName {
         const literal = new LiteralScope(this, LiteralType.Comment);
         try {
             this.advance(); // consume the last '/' at ///
@@ -708,13 +708,13 @@ export class Scanner {
                 this.advance();
             }
             literal.complete();
-            return TokenName.CommentLiteral;
+            return Token.TokenName.CommentLiteral;
         } finally {
             literal.destroy();
         }
     }
 
-    private scanMultiLineDocComment(): TokenName {
+    private scanMultiLineDocComment(): Token.TokenName {
         const literal = new LiteralScope(this, LiteralType.Comment);
         try {
             let endFound = false;
@@ -753,9 +753,9 @@ export class Scanner {
             }
             literal.complete();
             if (!endFound)
-                return TokenName.Illegal;
+                return Token.TokenName.Illegal;
             else
-                return TokenName.CommentLiteral;
+                return Token.TokenName.CommentLiteral;
         } finally {
             literal.destroy();
         }
@@ -798,12 +798,12 @@ export class Scanner {
         this.char = this.source.rollback(amount);
     }
 
-    private selectToken(tok: TokenName) {
+    private selectToken(tok: Token.TokenName) {
         this.advance();
         return tok;
     }
 
-    private selectTokenAlt(_next: number, _then: TokenName, _else: TokenName): TokenName {
+    private selectTokenAlt(_next: number, _then: Token.TokenName, _else: Token.TokenName): Token.TokenName {
         this.advance();
         if (this.char === _next)
             return this.selectToken(_then);
@@ -831,7 +831,7 @@ export class Scanner {
         return this.sourcePos !== startPosition;
     }
 
-    private skipSingleLineComment(): TokenName {
+    private skipSingleLineComment(): Token.TokenName {
         // The line terminator at the end of the line is not considered
         // to be part of the single-line comment; it is recognized
         // separately by the lexical grammar and becomes part of the
@@ -839,10 +839,10 @@ export class Scanner {
         while (!isLineTerminator(this.char))
             if (!this.advance()) break;
 
-        return TokenName.Whitespace;
+        return Token.TokenName.Whitespace;
     }
 
-    private skipMultiLineComment(): TokenName {
+    private skipMultiLineComment(): Token.TokenName {
         this.advance();
         while (!this.isSourcePastEndOfInput()) {
             const ch = this.char;
@@ -853,10 +853,10 @@ export class Scanner {
             // multi-line comments are treated as whitespace.
             if (ch === CharacterCodes.asterisk && this.char === CharacterCodes.slash) {
                 this.char = CharacterCodes.space;
-                return TokenName.Whitespace;
+                return Token.TokenName.Whitespace;
             }
         }
         // Unterminated multi-line comment.
-        return TokenName.Illegal;
+        return Token.TokenName.Illegal;
     }
 }

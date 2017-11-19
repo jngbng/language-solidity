@@ -1,4 +1,4 @@
-import { tokenToString } from "../parsing/token";
+import { Token } from "../parsing/token";
 import {
     ASTNode,
     ArrayTypeName,
@@ -81,7 +81,7 @@ export class ASTPrinter extends ASTVisitor {
     }
 
     public visitAssignment(node: Assignment): boolean {
-        this.writeLine(`Assignment using operator ${tokenToString(node.assignmentOperator)}`);
+        this.writeLine(`Assignment using operator ${Token.tokenToString(node.assignmentOperator)}`);
         this.printType(node);
         this.printSourcePart(node);
         return this.goDeeper();
@@ -123,14 +123,14 @@ export class ASTPrinter extends ASTVisitor {
     }
 
     public visitUnaryOperation(node: UnaryOperation): boolean {
-        this.writeLine(`UnaryOperation (${node.isPrefixOperation() ? "prefix" : "postfix"}) ${tokenToString(node.operator)})`);
+        this.writeLine(`UnaryOperation (${node.isPrefixOperation() ? "prefix" : "postfix"}) ${Token.tokenToString(node.operator)})`);
         this.printType(node);
         this.printSourcePart(node);
         return this.goDeeper();
     }
 
     public visitBinaryOperation(node: BinaryOperation): boolean {
-        this.writeLine(`BinaryOperation using operator ${tokenToString(node.operator)}`);
+        this.writeLine(`BinaryOperation using operator ${Token.tokenToString(node.operator)}`);
         this.printType(node);
         this.printSourcePart(node);
         return this.goDeeper();
@@ -151,7 +151,7 @@ export class ASTPrinter extends ASTVisitor {
     }
 
     public visitLiteral(node: Literal): boolean {
-        let tokenString = tokenToString(node.token);
+        let tokenString = Token.tokenToString(node.token);
         if (!tokenString)
             tokenString = "[no token]";
         this.writeLine(`Literal, token: ${tokenString} value: ${node.value}`);

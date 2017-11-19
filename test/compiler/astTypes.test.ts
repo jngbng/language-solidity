@@ -30,7 +30,7 @@ import {
     TupleType,
     Type
 } from "../../src/compiler/ast/ast";
-import { TokenName } from "../../src/compiler/parsing/token";
+import { Token } from "../../src/compiler/parsing/token";
 import { SourceLocation } from "../../src/compiler/types";
 
 test("storage_layout_simple", () => {
@@ -96,7 +96,7 @@ test("type_identifiers", () => {
     // expect(new RationalNumberType(rational(200, 77)).identifier).toBe("t_rational_200_by_77");
     // expect(new RationalNumberType(rational(2 * 200, 2 * 77)).identifier).toBe("t_rational_200_by_77");
     expect(
-        new StringLiteralType(new Literal(new SourceLocation(), TokenName.StringLiteral, "abc - def")).identifier).toBe(
+        new StringLiteralType(new Literal(new SourceLocation(), Token.TokenName.StringLiteral, "abc - def")).identifier).toBe(
         "t_stringliteral_196a9142ee0d40e274a6482393c762b16dd8315713207365e1e13d8d85b74fc4"
         );
     expect(Type.fromElementaryTypeName("bytes8").identifier).toBe("t_bytes8");

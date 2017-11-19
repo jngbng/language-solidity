@@ -1,9 +1,9 @@
 import {
     ASTNode,
     Declaration,
-    EventDefinition,
-    FunctionDefinition,
-    VariableDeclaration
+    isEventDefinition,
+    isFunctionDefinition,
+    isVariableDeclaration,
 } from "../ast/ast";
 import { Debug, MultiMap, contains, createMultiMap, first } from "../core";
 
@@ -36,7 +36,7 @@ export class DeclarationContainer {
             return true;
 
         if (update) {
-            Debug.assert(!(declaration instanceof FunctionDefinition),
+            Debug.assert(!isFunctionDefinition(declaration),
                 "Attempt to update function definition.");
             this._declarations.delete(name);
             this.invisibleDeclarations.delete(name);
@@ -77,18 +77,18 @@ export class DeclarationContainer {
         if (this.invisibleDeclarations.has(name))
             declarations.push(...this.invisibleDeclarations.get(name));
 
-        if (declaration instanceof FunctionDefinition || declaration instanceof EventDefinition) {
+        if (isFunctionDefinition(declaration) || isEventDefinition(declaration)) {
             // check that all other declarations with the same name are functions or a public state variable or events.
             // And then check that the signatures are different.
             for (const decl of declarations) {
-                if (decl instanceof VariableDeclaration) {
+                if (isVariableDeclaration(decl)) {
                     if (decl.isStateVariable() && !decl.isConstant() && decl.isPublic())
                         continue;
                     return decl;
                 }
-                if (declaration instanceof FunctionDefinition && !(decl instanceof FunctionDefinition))
+                if (isFunctionDefinition(declaration) && !isFunctionDefinition(decl))
                     return decl;
-                if (declaration instanceof EventDefinition && !(decl instanceof EventDefinition))
+                if (isEventDefinition(declaration) && !isEventDefinition(decl))
                     return decl;
                 // Or, continue.
             }

@@ -21,7 +21,7 @@ import { ExperimentalFeature, experimentalFeatureNames } from "../ast/experiment
 import { Debug } from "../core";
 import { DiagnosticReporter } from "../interface/diagnosticReporter";
 import { versionString } from "../interface/version";
-import { TokenName } from "../parsing/token";
+import { Token } from "../parsing/token";
 import { containsOnlyWarnings } from "../types";
 
 /**
@@ -79,7 +79,7 @@ export class SyntaxChecker extends ASTVisitor {
     public visitPragmaDirective(pragma: PragmaDirective): boolean {
         Debug.assert(pragma.tokens.length !== 0);
         Debug.assert(pragma.tokens.length === pragma.literals.length);
-        if (pragma.tokens[0] !== TokenName.Identifier)
+        if (pragma.tokens[0] !== Token.TokenName.Identifier)
             this.diagnosticReporter.syntaxError(
                 "Invalid pragma \"" + pragma.literals[0] + "\"", pragma.location);
         else if (pragma.literals[0] === "experimental") {
@@ -178,7 +178,7 @@ export class SyntaxChecker extends ASTVisitor {
     public visitUnaryOperation(operation: UnaryOperation): boolean {
         const v050 = this.sourceUnit.annotation.experimentalFeatures.has(ExperimentalFeature.V050);
 
-        if (operation.operator === TokenName.Add) {
+        if (operation.operator === Token.TokenName.Add) {
             if (v050)
                 this.diagnosticReporter.syntaxError("Use of unary + is deprecated.", operation.location);
             else

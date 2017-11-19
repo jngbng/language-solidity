@@ -3,12 +3,9 @@ import {
     ArrayType,
     ArrayTypeName,
     Block,
-    ContractDefinition,
     ContractType,
     DataLocation,
-    Declaration,
     ElementaryTypeName,
-    EnumDefinition,
     EnumType,
     FunctionDefinition,
     FunctionType,
@@ -19,19 +16,22 @@ import {
     MappingType,
     ModifierDefinition,
     ParameterList,
-    RationalNumberType,
     ReferenceType,
     Return,
-    StructDefinition,
     StructType,
     Type,
     UserDefinedTypeName,
     VariableDeclaration,
-    Visibility
+    Visibility,
+    isContractDefinition,
+    isEnumDefinition,
+    isRationalNumberType,
+    isStructDefinition
 } from "../ast/ast";
+import { isDeclaration, isReferenceType } from "../ast/ast";
 import { ASTVisitor } from "../ast/astVisitor";
 import { ExperimentalFeature } from "../ast/experimentalFeatures";
-import { Debug, first, last } from "../core";
+import { Debug, cast, first, last } from "../core";
 import { DiagnosticReporter } from "../interface/diagnosticReporter";
 import { SourceLocation } from "../types";
 import { ConstantEvaluator } from "./constantEvaluator";
@@ -126,11 +126,11 @@ export class ReferencesResolver extends ASTVisitor {
 
         typeName.annotation.referencedDeclaration = declaration;
 
-        if (declaration instanceof StructDefinition)
+        if (isStructDefinition(declaration))
             typeName.annotation.type = new StructType(declaration);
-        else if (declaration instanceof EnumDefinition)
+        else if (isEnumDefinition(declaration))
             typeName.annotation.type = new EnumType(declaration);
-        else if (declaration instanceof ContractDefinition)
+        else if (isContractDefinition(declaration))
             typeName.annotation.type = new ContractType(declaration);
         else
             this.fatalTypeError("Name has to refer to a struct, enum or contract.", typeName.location);
@@ -177,8 +177,8 @@ export class ReferencesResolver extends ASTVisitor {
         if (length) {
             if (!length.annotation.type)
                 new ConstantEvaluator(length, this.diagnosticReporter);
-            const lengthType = length.annotation.type as RationalNumberType;
-            if (!lengthType || !lengthType.mobileType)
+            const lengthType = length.annotation.type;
+            if (!isRationalNumberType(lengthType) || !lengthType.mobileType)
                 this.fatalTypeError("Invalid array length, expected integer literal.", length.location);
             else if (lengthType.isFractional())
                 this.fatalTypeError("Array with fractional length specified.", length.location);
@@ -209,10 +209,10 @@ export class ReferencesResolver extends ASTVisitor {
             // and memory for parameters (also return) of publicly visible functions.
             // They default to memory for function parameters and storage for local variables.
             // As an exception, "storage" is allowed for library functions.
-            if (type instanceof ReferenceType) {
+            if (isReferenceType(type)) {
                 let isPointer = true;
                 if (_variable.isExternalCallableParameter()) {
-                    const contract = (_variable.scope as Declaration).scope as ContractDefinition;
+                    const contract = cast(cast(_variable.scope, isDeclaration).scope, isContractDefinition);
                     if (contract.isLibrary()) {
                         if (varLoc === Location.Memory)
                             this.fatalTypeError(
@@ -233,8 +233,8 @@ export class ReferencesResolver extends ASTVisitor {
                     else
                         typeLoc = varLoc === Location.Memory ? DataLocation.Memory : DataLocation.Storage;
                 }
-                else if (_variable.isCallableParameter() && (_variable.scope as Declaration).isPublic()) {
-                    const contract = (_variable.scope as Declaration).scope as ContractDefinition;
+                else if (_variable.isCallableParameter() && cast(_variable.scope, isDeclaration).isPublic()) {
+                    const contract = cast(cast(_variable.scope, isDeclaration).scope, isContractDefinition);
                     // force locations of public or external function (return) parameters to memory
                     if (varLoc == Location.Storage && !contract.isLibrary())
                         this.fatalTypeError(

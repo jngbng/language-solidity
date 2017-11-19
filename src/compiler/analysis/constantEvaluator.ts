@@ -3,13 +3,13 @@ import {
     BoolType,
     Expression,
     Literal,
-    RationalNumberType,
     Type,
-    UnaryOperation
+    UnaryOperation,
+    isRationalNumberType
 } from "../ast/ast";
 import { ASTVisitor } from "../ast/astVisitor";
 import { DiagnosticReporter } from "../interface/diagnosticReporter";
-import { isCompareOp } from "../parsing/token";
+import { Token } from "../parsing/token";
 
 /**
  * Small drop-in replacement for TypeChecker to evaluate simple expressions of integer constants.
@@ -22,7 +22,7 @@ export class ConstantEvaluator extends ASTVisitor {
 
     public endVisitUnaryOperation(operation: UnaryOperation) {
         const subType = operation.subExpression.annotation.type;
-        if (!(subType instanceof RationalNumberType))
+        if (!isRationalNumberType(subType))
             this.diagnosticReporter.fatalTypeError("Invalid constant expression.", operation.subExpression.location);
         const t = subType.unaryOperatorResult(operation.operator);
         operation.annotation.type = t;
@@ -31,12 +31,12 @@ export class ConstantEvaluator extends ASTVisitor {
     public endVisitBinaryOperation(operation: BinaryOperation) {
         const leftType = operation.leftExpression.annotation.type;
         const rightType = operation.rightExpression.annotation.type;
-        if (!(leftType instanceof RationalNumberType))
+        if (!isRationalNumberType(leftType))
             this.diagnosticReporter.fatalTypeError("Invalid constant expression.", operation.leftExpression.location);
-        if (!(rightType instanceof RationalNumberType))
+        if (!isRationalNumberType(rightType))
             this.diagnosticReporter.fatalTypeError("Invalid constant expression.", operation.rightExpression.location);
         let commonType = leftType.binaryOperatorResult(operation.operator, rightType);
-        if (isCompareOp(operation.operator))
+        if (Token.isCompareOp(operation.operator))
             commonType = new BoolType();
         operation.annotation.type = commonType;
     }
