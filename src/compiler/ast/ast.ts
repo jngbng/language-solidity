@@ -2224,7 +2224,7 @@ export abstract class Type {
             return undefined;
     }
 
-    public static forLiteral(literal: Literal) {
+    public static forLiteral(literal: Literal): Type | undefined {
         switch (literal.token) {
             case Token.TokenName.TrueLiteral:
             case Token.TokenName.FalseLiteral:
