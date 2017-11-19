@@ -567,6 +567,10 @@ export abstract class Declaration extends ASTNode {
         return this.sourceUnit.annotation.path;
     }
 
+    public get fullyQualifiedName(): string {
+        return this.sourceUnitName + ":" + this.name;
+    }
+
     public isLValue(): boolean {
         return false;
     }
