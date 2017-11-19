@@ -3455,12 +3455,12 @@ export class ArrayType extends ReferenceType {
         }
         return ret;
     }
-    public signatureInExternalFunction(_structsByName: boolean): string {
+    public signatureInExternalFunction(structsByName: boolean): string {
         if (this.isByteArray())
             return this.canonicalName;
         else {
             Debug.assert(!!this.baseType);
-            return this.baseType.signatureInExternalFunction(_structsByName) +
+            return this.baseType.signatureInExternalFunction(structsByName) +
                 "[" +
                 (this.isDynamicallySized() ? "" : this.length.toFixed()) +
                 "]";
@@ -3896,16 +3896,16 @@ export class StructType extends ReferenceType {
         return this.structDefinition.annotation.canonicalName;
     }
 
-    public signatureInExternalFunction(_structsByName: boolean): string {
-        if (_structsByName)
+    public signatureInExternalFunction(structsByName: boolean): string {
+        if (structsByName)
             return this.canonicalName;
         else {
             const memberTypes = this.memoryMemberTypes;
             const memberTypeStrings = memberTypes.map(_t => {
                 Debug.assert(!!_t, "Parameter should have external type.");
-                const t = _t.interfaceType(_structsByName);
+                const t = _t.interfaceType(structsByName);
                 Debug.assert(!!t, "");
-                return t.signatureInExternalFunction(_structsByName);
+                return t.signatureInExternalFunction(structsByName);
             });
             return "(" + memberTypeStrings.join(",") + ")";
         }
